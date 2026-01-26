@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Local LLM Security Checklist & Guidance</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +43,7 @@
             'scan': 'scan 3s linear infinite',
             'fade-in': 'fadeIn 0.5s ease-out forwards',
             'slide-in': 'slideIn 0.4s ease-out forwards',
+            'slide-up': 'slideUp 0.3s ease-out forwards',
           },
           keyframes: {
             glow: {
@@ -60,6 +61,10 @@
             slideIn: {
               '0%': { opacity: '0', transform: 'translateX(-20px)' },
               '100%': { opacity: '1', transform: 'translateX(0)' },
+            },
+            slideUp: {
+              '0%': { opacity: '0', transform: 'translateY(20px)' },
+              '100%': { opacity: '1', transform: 'translateY(0)' },
             }
           }
         }
@@ -68,10 +73,17 @@
   </script>
   <style>
     * { scrollbar-width: thin; scrollbar-color: #3d5a80 #0f1629; }
-    *::-webkit-scrollbar { width: 8px; height: 8px; }
+    *::-webkit-scrollbar { width: 6px; height: 6px; }
     *::-webkit-scrollbar-track { background: #0f1629; }
     *::-webkit-scrollbar-thumb { background: #3d5a80; border-radius: 4px; }
     *::-webkit-scrollbar-thumb:hover { background: #5c7a99; }
+    
+    html { scroll-behavior: smooth; }
+    
+    body { 
+      -webkit-tap-highlight-color: transparent;
+      overscroll-behavior: none;
+    }
     
     .grid-bg {
       background-image: 
@@ -99,9 +111,6 @@
       border-left: 2px solid #00d4ff;
     }
     
-    .tooltip { display: none; }
-    .has-tooltip:hover .tooltip { display: block; }
-    
     .noise-overlay {
       background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
       opacity: 0.03;
@@ -110,14 +119,25 @@
     
     input[type="checkbox"] {
       appearance: none;
-      width: 20px;
-      height: 20px;
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      min-width: 24px;
       border: 2px solid #3d5a80;
-      border-radius: 4px;
+      border-radius: 6px;
       background: #0f1629;
       cursor: pointer;
       position: relative;
       transition: all 0.2s ease;
+    }
+    
+    @media (min-width: 768px) {
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        min-width: 20px;
+        border-radius: 4px;
+      }
     }
     
     input[type="checkbox"]:checked {
@@ -141,6 +161,7 @@
       border: 1px solid #243354;
       color: #8fa7bf;
       transition: all 0.2s ease;
+      font-size: 16px; /* Prevents zoom on iOS */
     }
     
     textarea:focus, input[type="text"]:focus {
@@ -151,136 +172,263 @@
     
     .progress-ring { transform: rotate(-90deg); }
     
-    @keyframes typewriter {
-      from { width: 0; }
-      to { width: 100%; }
-    }
-    
     .section-content { display: none; }
     .section-content.active { display: block; animation: fadeIn 0.3s ease-out; }
+    
+    /* Mobile sidebar overlay */
+    .sidebar-overlay {
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    
+    .sidebar-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+    
+    /* Mobile sidebar */
+    .mobile-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+    
+    .mobile-sidebar.active {
+      transform: translateX(0);
+    }
+    
+    /* Tips panel mobile */
+    @media (max-width: 767px) {
+      #tips-panel {
+        width: 100%;
+        top: 0;
+        border-left: none;
+        border-radius: 0;
+      }
+    }
+    
+    /* Touch-friendly buttons */
+    .touch-target {
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    /* Bottom action bar for mobile */
+    .mobile-action-bar {
+      padding-bottom: env(safe-area-inset-bottom, 0);
+    }
+    
+    /* Fix for iOS momentum scrolling */
+    .scroll-container {
+      -webkit-overflow-scrolling: touch;
+    }
   </style>
 </head>
 <body class="bg-cyber-900 text-cyber-100 font-body min-h-screen grid-bg">
   <!-- Noise overlay -->
   <div class="fixed inset-0 noise-overlay"></div>
   
+  <!-- Mobile Sidebar Overlay -->
+  <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onclick="closeSidebar()"></div>
+  
   <!-- Header -->
   <header class="fixed top-0 left-0 right-0 z-50 bg-cyber-900/95 backdrop-blur-sm border-b border-cyber-600">
-    <div class="max-w-[1800px] mx-auto px-6 py-4 flex items-center justify-between">
-      <div class="flex items-center gap-4">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-green flex items-center justify-center">
-          <svg class="w-6 h-6 text-cyber-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+    <div class="max-w-[1800px] mx-auto px-3 md:px-6 py-3 md:py-4">
+      <!-- Mobile Header -->
+      <div class="flex items-center justify-between md:hidden">
+        <button onclick="toggleSidebar()" class="touch-target p-2 -ml-2 hover:bg-cyber-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
+        </button>
+        
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-green flex items-center justify-center">
+            <svg class="w-5 h-5 text-cyber-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <span class="font-display font-bold text-sm text-white">LLM Security</span>
         </div>
-        <div>
-          <h1 class="font-display font-bold text-xl text-white">LLM Security Checklist</h1>
-          <p class="text-xs text-cyber-200 font-mono">Local Deployment Security Assessment Tool</p>
+        
+        <!-- Mobile Progress -->
+        <div class="flex items-center gap-2">
+          <span class="font-mono text-sm font-bold text-accent-cyan" id="mobile-progress-percent">0%</span>
         </div>
       </div>
       
-      <div class="flex items-center gap-3">
-        <!-- Progress indicator -->
-        <div class="flex items-center gap-3 px-4 py-2 bg-cyber-800 rounded-lg border border-cyber-600">
-          <svg class="w-16 h-16 progress-ring" viewBox="0 0 36 36">
-            <path class="text-cyber-700" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-            <path id="progress-circle" class="text-accent-cyan" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
-          </svg>
-          <div class="text-center">
-            <div class="font-mono text-2xl font-bold text-white" id="progress-percent">0%</div>
-            <div class="text-xs text-cyber-200">Complete</div>
+      <!-- Desktop Header -->
+      <div class="hidden md:flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-accent-cyan to-accent-green flex items-center justify-center">
+            <svg class="w-6 h-6 text-cyber-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="font-display font-bold text-xl text-white">LLM Security Checklist</h1>
+            <p class="text-xs text-cyber-200 font-mono">Local Deployment Security Assessment Tool</p>
           </div>
         </div>
         
-        <!-- Action buttons -->
-        <button onclick="exportData()" class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-          Export
-        </button>
-        <label class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all flex items-center gap-2 cursor-pointer">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          Import
-          <input type="file" accept=".json" onchange="importData(event)" class="hidden">
-        </label>
-        <button onclick="resetData()" class="px-4 py-2 bg-accent-red/20 hover:bg-accent-red/30 border border-accent-red/50 text-accent-red rounded-lg font-mono text-sm transition-all">
-          Reset
-        </button>
+        <div class="flex items-center gap-3">
+          <!-- Progress indicator -->
+          <div class="flex items-center gap-3 px-4 py-2 bg-cyber-800 rounded-lg border border-cyber-600">
+            <svg class="w-12 h-12 progress-ring" viewBox="0 0 36 36">
+              <path class="text-cyber-700" stroke="currentColor" stroke-width="3" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              <path id="progress-circle" class="text-accent-cyan" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+            </svg>
+            <div class="text-center">
+              <div class="font-mono text-xl font-bold text-white" id="progress-percent">0%</div>
+              <div class="text-xs text-cyber-200">Complete</div>
+            </div>
+          </div>
+          
+          <!-- Action buttons -->
+          <button onclick="exportData()" class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+            Export
+          </button>
+          <label class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all flex items-center gap-2 cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            Import
+            <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+          </label>
+          <button onclick="resetData()" class="px-4 py-2 bg-accent-red/20 hover:bg-accent-red/30 border border-accent-red/50 text-accent-red rounded-lg font-mono text-sm transition-all">
+            Reset
+          </button>
+        </div>
       </div>
     </div>
   </header>
 
-  <!-- Main layout -->
-  <div class="flex pt-24 min-h-screen">
-    <!-- Sidebar / Table of Contents -->
-    <aside class="fixed left-0 top-24 bottom-0 w-72 bg-cyber-800/50 border-r border-cyber-600 overflow-y-auto">
-      <div class="p-4">
-        <h2 class="font-display font-semibold text-sm text-cyber-200 uppercase tracking-wider mb-4 flex items-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
-          Table of Contents
-        </h2>
-        <nav id="toc-nav" class="space-y-1">
-          <!-- TOC items populated by JS -->
-        </nav>
-      </div>
-      
-      <!-- Stats panel -->
-      <div class="p-4 border-t border-cyber-600">
-        <h3 class="font-display font-semibold text-sm text-cyber-200 uppercase tracking-wider mb-3">Statistics</h3>
-        <div class="space-y-3">
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-cyber-300">Critical Items</span>
-            <span id="stat-critical" class="font-mono text-accent-red">0/0</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-cyber-300">High Priority</span>
-            <span id="stat-high" class="font-mono text-accent-amber">0/0</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-cyber-300">Medium Priority</span>
-            <span id="stat-medium" class="font-mono text-accent-purple">0/0</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-sm text-cyber-300">Low Priority</span>
-            <span id="stat-low" class="font-mono text-accent-green">0/0</span>
-          </div>
+  <!-- Mobile Sidebar -->
+  <aside id="mobile-sidebar" class="mobile-sidebar fixed left-0 top-0 bottom-0 w-[85%] max-w-[320px] bg-cyber-800 border-r border-cyber-600 z-50 md:hidden overflow-hidden flex flex-col">
+    <!-- Sidebar Header -->
+    <div class="p-4 border-b border-cyber-600 flex items-center justify-between">
+      <h2 class="font-display font-semibold text-white">Menu</h2>
+      <button onclick="closeSidebar()" class="touch-target p-2 -mr-2 hover:bg-cyber-700 rounded-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    
+    <!-- TOC Navigation -->
+    <nav id="mobile-toc-nav" class="flex-1 overflow-y-auto scroll-container p-3 space-y-1">
+      <!-- Populated by JS -->
+    </nav>
+    
+    <!-- Mobile Stats -->
+    <div class="p-4 border-t border-cyber-600 bg-cyber-900/50">
+      <h3 class="font-display font-semibold text-xs text-cyber-200 uppercase tracking-wider mb-3">Progress</h3>
+      <div class="grid grid-cols-2 gap-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-cyber-300">Critical</span>
+          <span id="mobile-stat-critical" class="font-mono text-accent-red">0/0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-cyber-300">High</span>
+          <span id="mobile-stat-high" class="font-mono text-accent-amber">0/0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-cyber-300">Medium</span>
+          <span id="mobile-stat-medium" class="font-mono text-accent-purple">0/0</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-cyber-300">Low</span>
+          <span id="mobile-stat-low" class="font-mono text-accent-green">0/0</span>
         </div>
       </div>
-    </aside>
+    </div>
+  </aside>
 
-    <!-- Main content area -->
-    <main class="ml-72 flex-1 p-6">
-      <div class="max-w-5xl mx-auto" id="main-content">
-        <!-- Content sections populated by JS -->
+  <!-- Desktop Sidebar -->
+  <aside class="hidden md:block fixed left-0 top-[73px] bottom-0 w-72 bg-cyber-800/50 border-r border-cyber-600 overflow-y-auto scroll-container">
+    <div class="p-4">
+      <h2 class="font-display font-semibold text-sm text-cyber-200 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Table of Contents
+      </h2>
+      <nav id="toc-nav" class="space-y-1">
+        <!-- TOC items populated by JS -->
+      </nav>
+    </div>
+    
+    <!-- Stats panel -->
+    <div class="p-4 border-t border-cyber-600">
+      <h3 class="font-display font-semibold text-sm text-cyber-200 uppercase tracking-wider mb-3">Statistics</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-cyber-300">Critical Items</span>
+          <span id="stat-critical" class="font-mono text-accent-red">0/0</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-cyber-300">High Priority</span>
+          <span id="stat-high" class="font-mono text-accent-amber">0/0</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-cyber-300">Medium Priority</span>
+          <span id="stat-medium" class="font-mono text-accent-purple">0/0</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-cyber-300">Low Priority</span>
+          <span id="stat-low" class="font-mono text-accent-green">0/0</span>
+        </div>
       </div>
-    </main>
+    </div>
+  </aside>
+
+  <!-- Main content area -->
+  <main class="md:ml-72 pt-16 md:pt-24 pb-24 md:pb-8">
+    <div class="max-w-5xl mx-auto px-3 md:px-6" id="main-content">
+      <!-- Content sections populated by JS -->
+    </div>
+  </main>
+
+  <!-- Mobile Bottom Action Bar -->
+  <div class="mobile-action-bar fixed bottom-0 left-0 right-0 bg-cyber-800/95 backdrop-blur-sm border-t border-cyber-600 p-3 md:hidden z-30">
+    <div class="flex items-center justify-around gap-2">
+      <button onclick="exportData()" class="touch-target flex-1 py-3 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-xs transition-all flex flex-col items-center gap-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+        Export
+      </button>
+      <label class="touch-target flex-1 py-3 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-xs transition-all flex flex-col items-center gap-1 cursor-pointer">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+        Import
+        <input type="file" accept=".json" onchange="importData(event)" class="hidden">
+      </label>
+      <button onclick="resetData()" class="touch-target flex-1 py-3 bg-accent-red/20 hover:bg-accent-red/30 border border-accent-red/50 text-accent-red rounded-lg font-mono text-xs transition-all flex flex-col items-center gap-1">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+        Reset
+      </button>
+    </div>
   </div>
 
   <!-- Toast notifications -->
-  <div id="toast-container" class="fixed bottom-6 right-6 z-50 space-y-2"></div>
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-3 md:right-6 left-3 md:left-auto z-50 space-y-2"></div>
 
   <!-- Comment Modal -->
-  <div id="comment-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center">
-    <div class="bg-cyber-800 border border-cyber-500 rounded-xl p-6 w-full max-w-lg glow-border animate-fade-in">
-      <h3 class="font-display font-bold text-xl text-white mb-4">Add Comment</h3>
-      <p id="modal-item-title" class="text-cyber-200 mb-4 text-sm"></p>
+  <div id="comment-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-cyber-800 border border-cyber-500 rounded-xl p-4 md:p-6 w-full max-w-lg glow-border animate-slide-up">
+      <h3 class="font-display font-bold text-lg md:text-xl text-white mb-2 md:mb-4">Add Comment</h3>
+      <p id="modal-item-title" class="text-cyber-200 mb-4 text-sm line-clamp-2"></p>
       <textarea id="comment-input" class="w-full h-32 rounded-lg p-3 font-mono text-sm resize-none" placeholder="Enter your notes, observations, or implementation details..."></textarea>
       <div class="flex justify-end gap-3 mt-4">
-        <button onclick="closeCommentModal()" class="px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all">Cancel</button>
-        <button onclick="saveComment()" class="px-4 py-2 bg-accent-cyan/20 hover:bg-accent-cyan/30 border border-accent-cyan text-accent-cyan rounded-lg font-mono text-sm transition-all">Save Comment</button>
+        <button onclick="closeCommentModal()" class="touch-target px-4 py-2 bg-cyber-700 hover:bg-cyber-600 border border-cyber-500 rounded-lg font-mono text-sm transition-all">Cancel</button>
+        <button onclick="saveComment()" class="touch-target px-4 py-2 bg-accent-cyan/20 hover:bg-accent-cyan/30 border border-accent-cyan text-accent-cyan rounded-lg font-mono text-sm transition-all">Save</button>
       </div>
     </div>
   </div>
 
-  <!-- Tips Panel (slide-in) -->
-  <div id="tips-panel" class="fixed right-0 top-24 bottom-0 w-96 bg-cyber-800 border-l border-cyber-600 transform translate-x-full transition-transform duration-300 z-40 overflow-y-auto">
-    <div class="p-6">
-      <div class="flex items-center justify-between mb-6">
+  <!-- Tips Panel -->
+  <div id="tips-panel" class="fixed right-0 top-0 md:top-[73px] bottom-0 w-full md:w-96 bg-cyber-800 border-l border-cyber-600 transform translate-x-full transition-transform duration-300 z-50 md:z-40 overflow-y-auto scroll-container">
+    <div class="p-4 md:p-6">
+      <div class="flex items-center justify-between mb-4 md:mb-6 sticky top-0 bg-cyber-800 py-2 -mt-2">
         <h2 class="font-display font-bold text-lg text-white flex items-center gap-2">
           <svg class="w-5 h-5 text-accent-amber" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Tips & Guidance
         </h2>
-        <button onclick="closeTipsPanel()" class="p-2 hover:bg-cyber-700 rounded-lg transition-colors">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        <button onclick="closeTipsPanel()" class="touch-target p-2 hover:bg-cyber-700 rounded-lg transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
       <div id="tips-content" class="space-y-4">
@@ -299,6 +447,7 @@ const securityData = {
     {
       id: "governance",
       title: "1. Governance & Pre-Deployment",
+      shortTitle: "Governance",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>`,
       description: "Essential governance and authorization requirements before any technical implementation.",
       tips: [
@@ -324,6 +473,7 @@ const securityData = {
     {
       id: "threat-model",
       title: "2. Threat Modeling (Design First)",
+      shortTitle: "Threat Modeling",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>`,
       description: "Systematic threat identification before implementation. Design security first, deploy second.",
       tips: [
@@ -349,6 +499,7 @@ const securityData = {
     {
       id: "attack-surface",
       title: "3. Attack Surface Analysis",
+      shortTitle: "Attack Surface",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>`,
       description: "Identify and understand all potential attack vectors specific to local LLM deployments.",
       tips: [
@@ -374,6 +525,7 @@ const securityData = {
     {
       id: "endpoint",
       title: "4. Endpoint Hardening (Laptops)",
+      shortTitle: "Endpoint Security",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`,
       description: "Security hardening for laptops running local LLM deployments.",
       tips: [
@@ -400,6 +552,7 @@ const securityData = {
     {
       id: "server",
       title: "5. Server Hardening",
+      shortTitle: "Server Security",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/></svg>`,
       description: "Security hardening for protected servers hosting LLM deployments.",
       tips: [
@@ -425,6 +578,7 @@ const securityData = {
     {
       id: "access",
       title: "6. Access Control",
+      shortTitle: "Access Control",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>`,
       description: "Authentication, authorization, and session management for LLM access.",
       tips: [
@@ -450,6 +604,7 @@ const securityData = {
     {
       id: "data-protection",
       title: "7. Data Protection",
+      shortTitle: "Data Protection",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>`,
       description: "Encryption, key management, and data loss prevention for LLM deployments.",
       tips: [
@@ -476,6 +631,7 @@ const securityData = {
     {
       id: "llm-security",
       title: "8. LLM-Specific Security",
+      shortTitle: "LLM Security",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>`,
       description: "Security controls specific to Large Language Model deployments.",
       tips: [
@@ -502,6 +658,7 @@ const securityData = {
     {
       id: "network",
       title: "9. Network Security",
+      shortTitle: "Network",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>`,
       description: "Network security controls for LLM infrastructure.",
       tips: [
@@ -526,6 +683,7 @@ const securityData = {
     {
       id: "compliance",
       title: "10. Legal & Compliance",
+      shortTitle: "Compliance",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>`,
       description: "Regulatory compliance requirements for LLM deployments.",
       tips: [
@@ -552,6 +710,7 @@ const securityData = {
     {
       id: "monitoring",
       title: "11. Monitoring & Logging",
+      shortTitle: "Monitoring",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>`,
       description: "Security monitoring, logging, and alerting for LLM systems.",
       tips: [
@@ -579,6 +738,7 @@ const securityData = {
     {
       id: "incident",
       title: "12. Incident Response",
+      shortTitle: "Incident Response",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
       description: "Incident response procedures for LLM security events.",
       tips: [
@@ -604,6 +764,7 @@ const securityData = {
     {
       id: "operations",
       title: "13. Operational Security",
+      shortTitle: "Operations",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>`,
       description: "Ongoing operational security procedures.",
       tips: [
@@ -673,37 +834,45 @@ function saveState() {
 // ============================================
 
 function renderTOC() {
-  const nav = document.getElementById('toc-nav');
-  nav.innerHTML = securityData.sections.map((section, idx) => `
+  const tocHTML = securityData.sections.map((section, idx) => `
     <button 
       onclick="scrollToSection('${section.id}')" 
-      class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm hover:bg-cyber-700 transition-colors flex items-center gap-2"
+      class="toc-item w-full text-left px-3 py-3 md:py-2 rounded-lg text-sm hover:bg-cyber-700 transition-colors flex items-center gap-3 touch-target"
       data-section="${section.id}"
     >
-      <span class="text-cyber-300">${section.icon}</span>
-      <span class="truncate">${section.title}</span>
+      <span class="text-cyber-300 flex-shrink-0">${section.icon}</span>
+      <span class="truncate hidden md:inline">${section.title}</span>
+      <span class="truncate md:hidden">${section.shortTitle}</span>
     </button>
   `).join('');
+  
+  // Desktop TOC
+  const desktopNav = document.getElementById('toc-nav');
+  if (desktopNav) desktopNav.innerHTML = tocHTML;
+  
+  // Mobile TOC
+  const mobileNav = document.getElementById('mobile-toc-nav');
+  if (mobileNav) mobileNav.innerHTML = tocHTML;
 }
 
 function renderSections() {
   const main = document.getElementById('main-content');
   main.innerHTML = securityData.sections.map(section => `
-    <section id="section-${section.id}" class="mb-12 animate-fade-in">
+    <section id="section-${section.id}" class="mb-8 md:mb-12 animate-fade-in">
       <!-- Section Header -->
-      <div class="flex items-start justify-between mb-6">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-green/20 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan">
+      <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4 md:mb-6">
+        <div class="flex items-start gap-3 md:gap-4">
+          <div class="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-green/20 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan flex-shrink-0">
             ${section.icon}
           </div>
-          <div>
-            <h2 class="font-display font-bold text-2xl text-white">${section.title}</h2>
-            <p class="text-cyber-200 text-sm mt-1">${section.description}</p>
+          <div class="min-w-0">
+            <h2 class="font-display font-bold text-lg md:text-2xl text-white leading-tight">${section.title}</h2>
+            <p class="text-cyber-200 text-xs md:text-sm mt-1">${section.description}</p>
           </div>
         </div>
         <button 
           onclick="showTips('${section.id}')"
-          class="px-4 py-2 bg-accent-amber/10 hover:bg-accent-amber/20 border border-accent-amber/30 text-accent-amber rounded-lg text-sm font-mono transition-all flex items-center gap-2"
+          class="touch-target w-full md:w-auto px-4 py-3 md:py-2 bg-accent-amber/10 hover:bg-accent-amber/20 border border-accent-amber/30 text-accent-amber rounded-lg text-sm font-mono transition-all flex items-center justify-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
           Tips & Watch Outs
@@ -711,7 +880,7 @@ function renderSections() {
       </div>
       
       <!-- Checklist Items -->
-      <div class="space-y-3">
+      <div class="space-y-2 md:space-y-3">
         ${section.items.map(item => renderChecklistItem(item)).join('')}
       </div>
     </section>
@@ -724,35 +893,35 @@ function renderChecklistItem(item) {
   const completedClass = state.completed ? 'completed' : '';
   
   return `
-    <div class="checklist-item ${completedClass} ${priorityClass} bg-cyber-800/50 rounded-lg p-4 border border-cyber-600 hover:border-cyber-500 transition-all" data-item-id="${item.id}">
-      <div class="flex items-start gap-4">
+    <div class="checklist-item ${completedClass} ${priorityClass} bg-cyber-800/50 rounded-lg p-3 md:p-4 border border-cyber-600 hover:border-cyber-500 transition-all" data-item-id="${item.id}">
+      <div class="flex items-start gap-3 md:gap-4">
         <input 
           type="checkbox" 
           ${state.completed ? 'checked' : ''} 
           onchange="toggleItem('${item.id}')"
-          class="mt-1 flex-shrink-0"
+          class="mt-0.5 flex-shrink-0"
         >
         <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-3 mb-1">
-            <h3 class="item-title font-display font-semibold text-white">${item.title}</h3>
-            <span class="px-2 py-0.5 rounded text-xs font-mono uppercase ${getPriorityBadgeClass(item.priority)}">${item.priority}</span>
+          <div class="flex flex-wrap items-center gap-2 mb-1">
+            <h3 class="item-title font-display font-semibold text-sm md:text-base text-white">${item.title}</h3>
+            <span class="px-2 py-0.5 rounded text-[10px] md:text-xs font-mono uppercase ${getPriorityBadgeClass(item.priority)}">${item.priority}</span>
           </div>
-          <p class="text-cyber-200 text-sm">${item.description}</p>
+          <p class="text-cyber-200 text-xs md:text-sm leading-relaxed">${item.description}</p>
           
           ${state.comment ? `
-            <div class="mt-3 p-3 bg-cyber-900/50 rounded-lg border border-cyber-700">
-              <div class="flex items-center gap-2 text-xs text-cyber-300 mb-1">
+            <div class="mt-2 md:mt-3 p-2 md:p-3 bg-cyber-900/50 rounded-lg border border-cyber-700">
+              <div class="flex items-center gap-2 text-[10px] md:text-xs text-cyber-300 mb-1">
                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
                 Comment
               </div>
-              <p class="text-sm text-cyber-100 font-mono">${escapeHtml(state.comment)}</p>
+              <p class="text-xs md:text-sm text-cyber-100 font-mono break-words">${escapeHtml(state.comment)}</p>
             </div>
           ` : ''}
         </div>
         
         <button 
           onclick="openCommentModal('${item.id}', '${escapeHtml(item.title)}')"
-          class="flex-shrink-0 p-2 hover:bg-cyber-700 rounded-lg transition-colors text-cyber-300 hover:text-accent-cyan"
+          class="touch-target flex-shrink-0 p-2 hover:bg-cyber-700 rounded-lg transition-colors text-cyber-300 hover:text-accent-cyan"
           title="Add/Edit Comment"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
@@ -770,6 +939,22 @@ function getPriorityBadgeClass(priority) {
     case 'low': return 'bg-accent-green/20 text-accent-green border border-accent-green/30';
     default: return 'bg-cyber-600 text-cyber-200';
   }
+}
+
+// ============================================
+// MOBILE SIDEBAR
+// ============================================
+
+function toggleSidebar() {
+  document.getElementById('mobile-sidebar').classList.toggle('active');
+  document.getElementById('sidebar-overlay').classList.toggle('active');
+  document.body.style.overflow = document.getElementById('mobile-sidebar').classList.contains('active') ? 'hidden' : '';
+}
+
+function closeSidebar() {
+  document.getElementById('mobile-sidebar').classList.remove('active');
+  document.getElementById('sidebar-overlay').classList.remove('active');
+  document.body.style.overflow = '';
 }
 
 // ============================================
@@ -795,7 +980,7 @@ function openCommentModal(itemId, itemTitle) {
   document.getElementById('comment-input').value = checklistState[itemId]?.comment || '';
   document.getElementById('comment-modal').classList.remove('hidden');
   document.getElementById('comment-modal').classList.add('flex');
-  document.getElementById('comment-input').focus();
+  setTimeout(() => document.getElementById('comment-input').focus(), 100);
 }
 
 function closeCommentModal() {
@@ -826,9 +1011,9 @@ function showTips(sectionId) {
         Tips & Guidance
       </h3>
       ${section.tips.map(tip => `
-        <div class="mb-4 p-3 bg-cyber-900/50 rounded-lg border border-cyber-700">
+        <div class="mb-3 p-3 bg-cyber-900/50 rounded-lg border border-cyber-700">
           <h4 class="font-semibold text-white text-sm mb-1">${tip.title}</h4>
-          <p class="text-cyber-200 text-sm">${tip.content}</p>
+          <p class="text-cyber-200 text-xs md:text-sm">${tip.content}</p>
         </div>
       `).join('')}
     </div>
@@ -840,8 +1025,8 @@ function showTips(sectionId) {
       </h3>
       <ul class="space-y-2">
         ${section.watchOuts.map(wo => `
-          <li class="flex items-start gap-2 text-sm text-cyber-200">
-            <span class="text-accent-red mt-1">•</span>
+          <li class="flex items-start gap-2 text-xs md:text-sm text-cyber-200">
+            <span class="text-accent-red mt-0.5 flex-shrink-0">•</span>
             <span>${wo}</span>
           </li>
         `).join('')}
@@ -850,16 +1035,27 @@ function showTips(sectionId) {
   `;
   
   document.getElementById('tips-panel').classList.remove('translate-x-full');
+  document.body.style.overflow = 'hidden';
 }
 
 function closeTipsPanel() {
   document.getElementById('tips-panel').classList.add('translate-x-full');
+  document.body.style.overflow = '';
 }
 
 function scrollToSection(sectionId) {
+  closeSidebar(); // Close mobile sidebar if open
+  
   const section = document.getElementById(`section-${sectionId}`);
   if (section) {
-    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const headerOffset = window.innerWidth < 768 ? 70 : 90;
+    const elementPosition = section.getBoundingClientRect().top;
+    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+    
+    window.scrollTo({
+      top: offsetPosition,
+      behavior: 'smooth'
+    });
     
     // Update active TOC item
     document.querySelectorAll('.toc-item').forEach(item => {
@@ -884,11 +1080,18 @@ function updateProgress() {
   });
   
   const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
-  document.getElementById('progress-percent').textContent = `${percent}%`;
+  
+  // Desktop progress
+  const desktopPercent = document.getElementById('progress-percent');
+  if (desktopPercent) desktopPercent.textContent = `${percent}%`;
+  
+  // Mobile progress
+  const mobilePercent = document.getElementById('mobile-progress-percent');
+  if (mobilePercent) mobilePercent.textContent = `${percent}%`;
   
   // Update SVG circle
   const circle = document.getElementById('progress-circle');
-  circle.setAttribute('stroke-dasharray', `${percent}, 100`);
+  if (circle) circle.setAttribute('stroke-dasharray', `${percent}, 100`);
 }
 
 function updateStats() {
@@ -905,10 +1108,21 @@ function updateStats() {
     });
   });
   
-  document.getElementById('stat-critical').textContent = `${stats.critical.done}/${stats.critical.total}`;
-  document.getElementById('stat-high').textContent = `${stats.high.done}/${stats.high.total}`;
-  document.getElementById('stat-medium').textContent = `${stats.medium.done}/${stats.medium.total}`;
-  document.getElementById('stat-low').textContent = `${stats.low.done}/${stats.low.total}`;
+  // Desktop stats
+  const desktopIds = ['stat-critical', 'stat-high', 'stat-medium', 'stat-low'];
+  desktopIds.forEach(id => {
+    const el = document.getElementById(id);
+    const key = id.replace('stat-', '');
+    if (el && stats[key]) el.textContent = `${stats[key].done}/${stats[key].total}`;
+  });
+  
+  // Mobile stats
+  const mobileIds = ['mobile-stat-critical', 'mobile-stat-high', 'mobile-stat-medium', 'mobile-stat-low'];
+  mobileIds.forEach(id => {
+    const el = document.getElementById(id);
+    const key = id.replace('mobile-stat-', '');
+    if (el && stats[key]) el.textContent = `${stats[key].done}/${stats[key].total}`;
+  });
 }
 
 // ============================================
@@ -998,13 +1212,13 @@ function showToast(message, type = 'info') {
   };
   
   const toast = document.createElement('div');
-  toast.className = `px-4 py-3 rounded-lg border ${colors[type]} font-mono text-sm animate-slide-in`;
+  toast.className = `px-4 py-3 rounded-lg border ${colors[type]} font-mono text-sm animate-slide-up text-center md:text-left`;
   toast.textContent = message;
   container.appendChild(toast);
   
   setTimeout(() => {
     toast.style.opacity = '0';
-    toast.style.transform = 'translateX(20px)';
+    toast.style.transform = 'translateY(20px)';
     toast.style.transition = 'all 0.3s ease';
     setTimeout(() => toast.remove(), 300);
   }, 3000);
@@ -1021,7 +1235,7 @@ function setupScrollObserver() {
         });
       }
     });
-  }, { threshold: 0.2, rootMargin: '-100px 0px -70% 0px' });
+  }, { threshold: 0.1, rootMargin: '-80px 0px -70% 0px' });
   
   securityData.sections.forEach(section => {
     const el = document.getElementById(`section-${section.id}`);
@@ -1034,7 +1248,14 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeCommentModal();
     closeTipsPanel();
+    closeSidebar();
   }
+});
+
+// Handle back button for mobile panels
+window.addEventListener('popstate', () => {
+  closeTipsPanel();
+  closeSidebar();
 });
 
 // ============================================
