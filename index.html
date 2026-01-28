@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>LLM Security Checklist | MITRE ATLAS + OWASP</title>
-  <script src="/tailwinds.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script>
     tailwind.config = {
@@ -163,7 +163,7 @@
       <button onclick="exportMarkdown()" class="flex-1 py-3 rounded-lg border font-mono text-xs flex flex-col items-center gap-1 dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Report</button>
       <button onclick="exportJSON()" class="flex-1 py-3 rounded-lg border font-mono text-xs dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💾 JSON</button>
       <label class="flex-1 py-3 rounded-lg border font-mono text-xs flex items-center justify-center cursor-pointer dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">📥 Import<input type="file" accept=".json" onchange="importJSON(event)" class="hidden"></label>
-      <button onclick="resetAll()" class="flex-1 py-3 bg-accent-red/20 border border-accent-red/50 text-accent-red rounded-lg font-mono text-xs">🗑️ Reset</button>
+      <button onclick="resetAll()" class="flex-1 py-3 bg-accent-red/20 border border-accent-red/50 text-accent-red rounded-lg font-mono text-xs">🗑️</button>
     </div>
   </div>
 
@@ -198,7 +198,7 @@
 
 <script>
 const THEME_KEY = 'llm-sec-theme';
-const STATE_KEY = 'llm-sec-state-v4';
+const STATE_KEY = 'llm-sec-state-v5';
 
 function initTheme() {
   const s = localStorage.getItem(THEME_KEY);
@@ -247,7 +247,81 @@ const data = {
       ]
     },
     {
-      id: "prompt-injection", title: "2. Prompt Injection Defense", short: "Prompt Injection",
+      id: "user-security", title: "2. User/Personal LLM Security", short: "User Security",
+      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>`,
+      desc: "Security for personal LLM use: finance management, document analysis, note-taking (Obsidian), K8S management.",
+      items: [
+        { id: "usr-1", title: "Financial Document Isolation", desc: "Isolate LLM processing of receipts, invoices, and financial docs from other data.", priority: "critical", frameworks: ["OWASP LLM02", "PCI-DSS"],
+          steps: ["Create dedicated folder for financial docs with restricted permissions", "Use separate LLM context/session for financial processing", "Never mix financial data with other document types in same prompt", "Implement automatic PII masking before LLM processing", "Store processed results encrypted, separate from source docs"],
+          verify: ["Financial docs in isolated directory", "LLM sessions don't persist financial context", "Bank account numbers, amounts masked in logs", "Encryption verified on output storage"] },
+        { id: "usr-2", title: "Document Upload Sanitization", desc: "Scan and sanitize all uploaded documents before LLM processing.", priority: "critical", frameworks: ["ATLAS AML.T0051.001"],
+          steps: ["Implement file type validation (PDF, images, text only)", "Scan for malware before processing", "Strip metadata from documents (EXIF, PDF metadata)", "Check for hidden text/layers in PDFs", "Limit file sizes to prevent DoS"],
+          verify: ["Unknown file types rejected", "AV scan runs on each upload", "exiftool shows no metadata post-processing", "Hidden text detection working"] },
+        { id: "usr-3", title: "Obsidian/Note Integration Security", desc: "Secure LLM integration with note-taking apps like Obsidian.", priority: "high", frameworks: ["OWASP LLM02"],
+          steps: ["Use local-only LLM plugins (no cloud API calls)", "Restrict plugin file system access to vault only", "Disable auto-sync during LLM processing", "Review plugin permissions before install", "Backup vault before enabling LLM features"],
+          verify: ["Network monitor shows no external calls", "Plugin can't access files outside vault", "Sync paused during processing", "Backup exists and is recent"] },
+        { id: "usr-4", title: "K8S/Infrastructure LLM Guardrails", desc: "Prevent destructive operations when using LLM for K8S management.", priority: "critical", frameworks: ["MITRE ATLAS", "CIS K8S"],
+          steps: ["Run LLM suggestions in --dry-run mode first", "Implement approval workflow for destructive commands (delete, scale to 0)", "Use separate kubeconfig with limited RBAC for LLM", "Log all LLM-suggested commands before execution", "Set resource quotas to prevent cluster exhaustion"],
+          verify: ["Destructive commands require confirmation", "LLM kubeconfig has minimal permissions", "All commands logged with source=llm tag", "Resource quotas enforced"] },
+        { id: "usr-5", title: "Personal Data Classification", desc: "Classify sensitivity of personal data before LLM processing.", priority: "high", frameworks: ["GDPR", "OWASP LLM02"],
+          steps: ["Create data classification policy (public, private, sensitive)", "Tag files/folders with classification level", "Configure LLM to refuse processing 'sensitive' tagged data", "Implement different retention policies per classification", "Review classification monthly"],
+          verify: ["Classification tags present on data", "Sensitive data blocked from LLM", "Retention policies active", "Monthly review scheduled"] },
+        { id: "usr-6", title: "Credential Leak Prevention", desc: "Prevent accidental exposure of credentials in LLM prompts.", priority: "critical", frameworks: ["OWASP LLM02", "CWE-798"],
+          steps: ["Scan prompts for credential patterns before sending", "Use environment variables, never paste secrets", "Implement .llmignore for sensitive files", "Auto-redact API keys, passwords, tokens in input", "Alert on credential-like patterns in output"],
+          verify: ["Test prompt with fake API key - gets redacted", ".llmignore excludes .env, credentials files", "Output scanning catches leaked secrets", "Alerts fire on credential patterns"] },
+        { id: "usr-7", title: "Local Backup Before LLM Modifications", desc: "Always backup before letting LLM modify files.", priority: "high", frameworks: ["Best Practice"],
+          steps: ["Implement automatic backup before any file modification", "Use git for version control on LLM-managed files", "Configure backup retention (keep last 10 versions)", "Test restore procedure monthly", "Store backups on separate volume"],
+          verify: ["Backup created before each modification", "Git history shows all changes", "Can restore to any previous version", "Backups on separate storage confirmed"] },
+        { id: "usr-8", title: "Output Validation for Automated Actions", desc: "Validate LLM outputs before executing any automated action.", priority: "critical", frameworks: ["OWASP LLM06"],
+          steps: ["Parse and validate LLM output format before execution", "Implement allowlist of permitted operations", "Require human confirmation for irreversible actions", "Rate limit automated executions", "Log all LLM-triggered actions with full context"],
+          verify: ["Malformed output rejected", "Only allowlisted operations execute", "Destructive actions need confirmation", "Rate limits prevent runaway automation"] }
+      ]
+    },
+    {
+      id: "agentic-security", title: "3. Agentic/Orchestration Security", short: "Agentic Security",
+      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`,
+      desc: "Security for multi-agent systems, orchestrators, Claude Code, MCP servers, and human-in-the-loop workflows.",
+      items: [
+        { id: "agt-1", title: "Master Orchestrator Isolation", desc: "Isolate orchestrator agent from worker agents with strict boundaries.", priority: "critical", frameworks: ["ATLAS AML.T0041", "Zero Trust"],
+          steps: ["Run orchestrator in separate container/process from workers", "Implement message queue for orchestrator-worker communication", "Orchestrator should not have direct file/network access workers have", "Use separate credentials for orchestrator vs workers", "Log all orchestrator decisions and delegations"],
+          verify: ["Orchestrator process isolated (different PID namespace)", "Communication only via message queue", "Orchestrator can't access worker resources directly", "Credential separation verified"] },
+        { id: "agt-2", title: "Worker Agent Sandboxing", desc: "Each worker agent runs in isolated sandbox with minimal permissions.", priority: "critical", frameworks: ["ATLAS AML.T0041", "Principle of Least Privilege"],
+          steps: ["Run each worker in separate container with --cap-drop=ALL", "Mount only required directories as read-only where possible", "Network isolation: workers can't communicate directly with each other", "Set resource limits per worker (CPU, memory, time)", "Implement worker termination on timeout or error"],
+          verify: ["Workers in separate containers", "File access limited to required paths", "Workers can't reach other workers", "Resource limits enforced", "Timeout kills runaway workers"] },
+        { id: "agt-3", title: "Human-in-the-Loop via PR/MR", desc: "Require human approval via Pull/Merge Request for agent changes.", priority: "critical", frameworks: ["SDLC Security", "Change Management"],
+          steps: ["Configure agents to create branches, never push to main", "All changes submitted as Pull/Merge Request", "Require human review and approval before merge", "Implement automated checks (linting, tests) on PR", "Audit log of all approvals with approver identity"],
+          verify: ["Direct push to main blocked", "PRs require approval", "CI checks run on all PRs", "Approval audit trail exists"] },
+        { id: "agt-4", title: "MCP Server Authentication", desc: "Secure MCP (Model Context Protocol) servers with proper authentication.", priority: "critical", frameworks: ["OWASP API Security"],
+          steps: ["Implement API key or mTLS authentication for MCP connections", "Validate client identity before accepting connections", "Use allowlist of permitted MCP clients", "Encrypt all MCP traffic (TLS 1.3)", "Log all MCP connections with client identity"],
+          verify: ["Unauthenticated MCP connection rejected", "Client identity logged", "TLS enforced on all connections", "Only allowlisted clients connect"] },
+        { id: "agt-5", title: "Shared Memory/State Security", desc: "Secure persistent storage used for agent shared memory.", priority: "high", frameworks: ["OWASP LLM02", "Data Protection"],
+          steps: ["Encrypt shared memory/state storage at rest", "Implement access control: which agents can read/write what", "Version all state changes with agent identity", "Set retention policy for shared state", "Implement state validation before agent reads"],
+          verify: ["Storage encryption verified", "Agent A can't access Agent B's private state", "State changes tracked with agent ID", "Old state automatically purged"] },
+        { id: "agt-6", title: "Context Window Management", desc: "Prevent context poisoning and manage context limits securely.", priority: "high", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"],
+          steps: ["Implement context size monitoring and limits", "Sanitize context before passing between agents", "Clear sensitive data from context after use", "Detect and block context injection attempts", "Log context size and content hashes"],
+          verify: ["Context size alerts at threshold", "Cross-agent context is sanitized", "Sensitive data cleared after task", "Injection patterns blocked"] },
+        { id: "agt-7", title: "GitHub/GitLab MCP Security", desc: "Secure integration with GitHub/GitLab via MCP servers.", priority: "critical", frameworks: ["GitHub Security", "GitLab Security"],
+          steps: ["Use fine-grained tokens with minimal permissions", "Token should only have access to specific repos", "Implement branch protection rules", "Require signed commits for agent-created commits", "Monitor for unusual commit patterns"],
+          verify: ["Token has minimal scopes", "Token limited to required repos", "Branch protection active", "Commits are signed", "Alerting on anomalous activity"] },
+        { id: "agt-8", title: "Parallel Agent Coordination", desc: "Secure coordination when running multiple agents in parallel.", priority: "high", frameworks: ["Distributed Systems Security"],
+          steps: ["Implement distributed locking for shared resources", "Prevent race conditions in file/state access", "Set maximum parallel agent count", "Monitor for deadlocks and implement timeouts", "Log all coordination events"],
+          verify: ["Locks prevent concurrent modification", "No race conditions in testing", "Parallel limit enforced", "Deadlock detection working"] },
+        { id: "agt-9", title: "Agent Task Scoping", desc: "Strictly scope what each agent task can do.", priority: "critical", frameworks: ["Principle of Least Privilege"],
+          steps: ["Define explicit task boundaries in agent instructions", "Implement capability-based security per task", "Agent can't request capabilities beyond task scope", "Log capability usage per task", "Alert on scope violation attempts"],
+          verify: ["Task boundaries documented", "Capabilities limited to task needs", "Scope escalation blocked", "All capability use logged"] },
+        { id: "agt-10", title: "Agent Output Validation Pipeline", desc: "Validate all agent outputs before action or display.", priority: "critical", frameworks: ["OWASP LLM05", "Input Validation"],
+          steps: ["Implement output schema validation", "Scan outputs for injection patterns", "Validate outputs against expected format", "Quarantine suspicious outputs for review", "Never execute unvalidated agent output"],
+          verify: ["Schema validation catches malformed output", "Injection patterns detected", "Invalid format rejected", "Suspicious outputs quarantined"] },
+        { id: "agt-11", title: "Agent Rollback Capability", desc: "Ability to rollback any changes made by agents.", priority: "high", frameworks: ["Disaster Recovery"],
+          steps: ["Track all agent modifications with transaction IDs", "Implement automated rollback procedure", "Test rollback monthly", "Keep rollback data for 30 days minimum", "Document rollback procedure"],
+          verify: ["All changes have transaction IDs", "Rollback tested and working", "30-day rollback data retained", "Procedure documented"] },
+        { id: "agt-12", title: "Claude Code Specific Security", desc: "Security measures specific to Claude Code CLI usage.", priority: "high", frameworks: ["CLI Security", "OWASP"],
+          steps: ["Review all subagent spawn requests", "Limit Claude Code file system access", "Use --allowedTools flag to restrict capabilities", "Monitor token usage to detect extraction attempts", "Implement project-specific permission profiles"],
+          verify: ["Subagent spawns logged", "File access limited to project", "Only needed tools enabled", "Token usage monitored", "Permission profiles active"] }
+      ]
+    },
+    {
+      id: "prompt-injection", title: "4. Prompt Injection Defense", short: "Prompt Injection",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>`,
       desc: "Defense against OWASP LLM01 - the #1 vulnerability.",
       items: [
@@ -272,8 +346,8 @@ const data = {
       ]
     },
     {
-      id: "supply-chain", title: "3. Supply Chain Security", short: "Supply Chain",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`,
+      id: "supply-chain", title: "5. Supply Chain Security", short: "Supply Chain",
+      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>`,
       desc: "OWASP LLM03 & ATLAS AML.T0010 - $1B+ documented impact.",
       items: [
         { id: "sc-1", title: "Model Provenance", desc: "Verify source and integrity of all models.", priority: "critical", frameworks: ["OWASP LLM03", "ATLAS AML.T0010"],
@@ -297,7 +371,7 @@ const data = {
       ]
     },
     {
-      id: "data-protection", title: "4. Data Protection", short: "Data Protection",
+      id: "data-protection", title: "6. Data Protection", short: "Data Protection",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>`,
       desc: "OWASP LLM02 Sensitive Information Disclosure.",
       items: [
@@ -322,7 +396,7 @@ const data = {
       ]
     },
     {
-      id: "access-control", title: "5. Access Control", short: "Access Control",
+      id: "access-control", title: "7. Access Control", short: "Access Control",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>`,
       desc: "Authentication and authorization for LLM access.",
       items: [
@@ -344,7 +418,7 @@ const data = {
       ]
     },
     {
-      id: "monitoring", title: "6. Monitoring", short: "Monitoring",
+      id: "monitoring", title: "8. Monitoring", short: "Monitoring",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>`,
       desc: "Security monitoring and detection.",
       items: [
@@ -366,7 +440,7 @@ const data = {
       ]
     },
     {
-      id: "incident-response", title: "7. Incident Response", short: "Incident Response",
+      id: "incident-response", title: "9. Incident Response", short: "Incident Response",
       icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
       desc: "Response procedures for LLM security events.",
       items: [
@@ -606,7 +680,7 @@ function updateProgress() {
 
 // EXPORT JSON
 function exportJSON() {
-  const obj = { version: '4.0', date: new Date().toISOString(), state };
+  const obj = { version: '5.0', date: new Date().toISOString(), state };
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }));
   a.download = `llm-security-${new Date().toISOString().split('T')[0]}.json`;
@@ -682,7 +756,6 @@ function exportMarkdown() {
     
     md += '\n';
     
-    // Add incomplete items with steps
     const incomplete = sec.items.filter(i => !state[i.id]?.done);
     if (incomplete.length > 0) {
       md += `#### Outstanding Items\n\n`;
