@@ -25,7 +25,6 @@
     .dark::-webkit-scrollbar { width: 8px; } .dark::-webkit-scrollbar-track { background: #0f1629; } .dark::-webkit-scrollbar-thumb { background: #3d5a80; border-radius: 4px; }
     html:not(.dark) { scrollbar-width: thin; scrollbar-color: #94a3b8 #f1f5f9; }
     html:not(.dark)::-webkit-scrollbar { width: 8px; } html:not(.dark)::-webkit-scrollbar-track { background: #f1f5f9; } html:not(.dark)::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-    html { scroll-behavior: smooth; }
     body { -webkit-tap-highlight-color: transparent; }
     .dark .grid-bg { background-color: #0a0e17; background-image: linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px); background-size: 50px 50px; }
     html:not(.dark) .grid-bg { background-color: #f8fafc; background-image: linear-gradient(rgba(14,165,233,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(14,165,233,0.05) 1px, transparent 1px); background-size: 50px 50px; }
@@ -57,14 +56,11 @@
     .checklist-item-clickable:hover { transform: translateX(3px); }
     .step-num { width: 26px; height: 26px; min-width: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 12px; font-weight: 600; }
     @media (max-width: 767px) { #detail-modal > div { max-height: 90vh; } }
-    section[id^="section-"] { scroll-margin-top: 80px; }
-    @media (min-width: 768px) { section[id^="section-"] { scroll-margin-top: 100px; } }
   </style>
 </head>
 <body class="font-body min-h-screen grid-bg">
   <div id="sidebar-overlay" class="sidebar-overlay fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden" onclick="closeSidebar()"></div>
 
-  <!-- Header -->
   <header class="fixed top-0 left-0 right-0 z-50 backdrop-blur-sm border-b dark:bg-cyber-900/95 dark:border-cyber-600 bg-white/95 border-slate-200">
     <div class="max-w-[1800px] mx-auto px-3 md:px-6 py-3 md:py-4">
       <div class="flex items-center justify-between md:hidden">
@@ -75,8 +71,7 @@
         <div class="flex items-center gap-1">
           <span class="font-mono text-sm font-bold text-accent-cyan" id="mobile-progress">0%</span>
           <button onclick="toggleTheme()" class="p-2 rounded-lg dark:hover:bg-cyber-700 hover:bg-slate-100">
-            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700 dark:block hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           </button>
         </div>
       </div>
@@ -105,46 +100,31 @@
             </div>
           </div>
           <button onclick="toggleTheme()" class="p-2.5 rounded-lg border dark:bg-cyber-700 dark:border-cyber-500 bg-slate-100 border-slate-200" title="Toggle theme">
-            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700 dark:block hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700 dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            <svg class="w-5 h-5 dark:text-cyber-100 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
           </button>
-          <button onclick="exportJSON()" class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>JSON
-          </button>
-          <button onclick="exportMarkdown()" class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>Report (.md)
-          </button>
-          <label class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 cursor-pointer dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>Import
-            <input type="file" accept=".json" onchange="importJSON(event)" class="hidden">
-          </label>
+          <button onclick="exportJSON()" class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💾 JSON</button>
+          <button onclick="exportMarkdown()" class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Report</button>
+          <label class="px-4 py-2 rounded-lg border font-mono text-sm flex items-center gap-2 cursor-pointer dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">📥 Import<input type="file" accept=".json" onchange="importJSON(event)" class="hidden"></label>
           <button onclick="resetAll()" class="px-4 py-2 bg-accent-red/20 border border-accent-red/50 text-accent-red rounded-lg font-mono text-sm">Reset</button>
         </div>
       </div>
     </div>
   </header>
 
-  <!-- Mobile Sidebar -->
   <aside id="mobile-sidebar" class="mobile-sidebar fixed left-0 top-0 bottom-0 w-[85%] max-w-[320px] z-50 md:hidden overflow-hidden flex flex-col dark:bg-cyber-800 bg-white border-r dark:border-cyber-600 border-slate-200">
     <div class="p-4 border-b flex items-center justify-between dark:border-cyber-600 border-slate-200">
-      <h2 class="font-display font-semibold dark:text-white text-slate-900">Menu</h2>
+      <h2 class="font-display font-semibold dark:text-white text-slate-900">Sections</h2>
       <button onclick="closeSidebar()" class="p-2 rounded-lg dark:hover:bg-cyber-700 hover:bg-slate-100">
         <svg class="w-6 h-6 dark:text-cyber-100 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="p-3 border-b dark:border-cyber-600 border-slate-200">
-      <a href="aiguide.html" onclick="closeSidebar()" class="w-full py-3 rounded-lg font-mono text-sm flex items-center justify-center gap-2 bg-gradient-to-r from-accent-cyan to-accent-green text-cyber-950 font-semibold">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>Quick Guide
-      </a>
-    </div>
     <nav id="mobile-toc" class="flex-1 overflow-y-auto p-3 space-y-1"></nav>
     <div class="p-4 border-t dark:border-cyber-600 border-slate-200 space-y-2">
-      <button onclick="exportMarkdown(); closeSidebar()" class="w-full py-3 rounded-lg border font-mono text-sm flex items-center justify-center gap-2 dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Export Report (.md)</button>
+      <button onclick="exportMarkdown(); closeSidebar()" class="w-full py-3 rounded-lg border font-mono text-sm dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Export Report</button>
       <button onclick="exportJSON(); closeSidebar()" class="w-full py-3 rounded-lg border font-mono text-sm dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💾 Export JSON</button>
     </div>
   </aside>
 
-  <!-- Desktop Sidebar -->
   <aside class="hidden md:block fixed left-0 top-[73px] bottom-0 w-72 border-r overflow-y-auto dark:bg-cyber-800/50 dark:border-cyber-600 bg-slate-50/80 border-slate-200">
     <div class="p-4">
       <div>-----</div>
@@ -159,29 +139,24 @@
         <div class="flex justify-between"><span class="dark:text-cyber-300 text-slate-500">Medium</span><span id="stat-medium" class="font-mono text-accent-purple">0/0</span></div>
         <div class="flex justify-between"><span class="dark:text-cyber-300 text-slate-500">Low</span><span id="stat-low" class="font-mono text-accent-green">0/0</span></div>
       </div>
-      <p class="mt-4 pt-4 border-t text-xs dark:border-cyber-700 dark:text-cyber-400 border-slate-200 text-slate-400">💡 Click items for implementation steps</p>
     </div>
   </aside>
 
-  <!-- Main -->
   <main class="md:ml-72 pt-16 md:pt-24 pb-24 md:pb-8">
     <div class="max-w-5xl mx-auto px-3 md:px-6" id="main-content"></div>
   </main>
 
-  <!-- Mobile Bottom Bar -->
   <div class="fixed bottom-0 left-0 right-0 backdrop-blur-sm border-t p-3 md:hidden z-30 dark:bg-cyber-800/95 dark:border-cyber-600 bg-white/95 border-slate-200">
     <div class="flex gap-2">
-      <button onclick="exportMarkdown()" class="flex-1 py-3 rounded-lg border font-mono text-xs flex flex-col items-center gap-1 dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Report</button>
+      <button onclick="exportMarkdown()" class="flex-1 py-3 rounded-lg border font-mono text-xs dark:bg-accent-purple/20 dark:border-accent-purple/50 dark:text-accent-purple bg-purple-50 border-purple-200 text-purple-700">📄 Report</button>
       <button onclick="exportJSON()" class="flex-1 py-3 rounded-lg border font-mono text-xs dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💾 JSON</button>
-      <label class="flex-1 py-3 rounded-lg border font-mono text-xs flex items-center justify-center cursor-pointer dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">📥 Import<input type="file" accept=".json" onchange="importJSON(event)" class="hidden"></label>
-      <button onclick="resetAll()" class="flex-1 py-3 bg-accent-red/20 border border-accent-red/50 text-accent-red rounded-lg font-mono text-xs">🗑️ Reset</button>
+      <label class="flex-1 py-3 rounded-lg border font-mono text-xs flex items-center justify-center cursor-pointer dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">📥<input type="file" accept=".json" onchange="importJSON(event)" class="hidden"></label>
+      <button onclick="resetAll()" class="flex-1 py-3 bg-accent-red/20 border border-accent-red/50 text-accent-red rounded-lg font-mono text-xs">🗑️</button>
     </div>
   </div>
 
-  <!-- Toast -->
   <div id="toast" class="fixed bottom-20 md:bottom-6 right-3 md:right-6 left-3 md:left-auto z-50 space-y-2"></div>
 
-  <!-- Detail Modal -->
   <div id="detail-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeDetail()">
     <div class="rounded-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border shadow-2xl animate-slide-up dark:bg-cyber-800 dark:border-cyber-500 bg-white border-slate-200">
       <div class="sticky top-0 p-4 border-b flex items-center justify-between dark:bg-cyber-800 dark:border-cyber-600 bg-white border-slate-200 z-10">
@@ -194,7 +169,6 @@
     </div>
   </div>
 
-  <!-- Comment Modal -->
   <div id="comment-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden items-center justify-center p-4" onclick="if(event.target===this)closeComment()">
     <div class="rounded-xl p-4 md:p-6 w-full max-w-lg border shadow-2xl animate-slide-up dark:bg-cyber-800 dark:border-cyber-500 bg-white border-slate-200">
       <h3 class="font-display font-bold text-lg mb-2 dark:text-white text-slate-900">Add Comment</h3>
@@ -209,7 +183,7 @@
 
 <script>
 const THEME_KEY = 'llm-sec-theme';
-const STATE_KEY = 'llm-sec-state-v4';
+const STATE_KEY = 'llm-sec-state-v5';
 
 function initTheme() {
   const s = localStorage.getItem(THEME_KEY);
@@ -223,185 +197,90 @@ function toggleTheme() {
 }
 initTheme();
 
-// DATA
 const data = {
   sections: [
-    {
-      id: "offline-llm", title: "1. Offline/Local LLM Security", short: "Offline LLM",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`,
-      desc: "Critical security for locally-hosted LLM deployments.",
-      items: [
-        { id: "off-1", title: "Model File Access Controls", desc: "Restrict model file permissions to service account only.", priority: "critical", frameworks: ["ATLAS AML.T0035"],
-          steps: ["Identify model storage locations (e.g., ~/.ollama/models)", "Create service account: sudo useradd -r -s /bin/false llm-service", "Change ownership: sudo chown -R llm-service:llm-service /path/to/models", "Set permissions: sudo chmod 700 /path/to/models", "Configure inference service to run as this account"],
-          verify: ["ls -la shows only service account access", "Regular users get 'Permission denied'", "Process runs as service account: ps aux | grep inference"] },
-        { id: "off-2", title: "Inference Runtime Isolation", desc: "Run inference in isolated container with limited access.", priority: "critical", frameworks: ["ATLAS AML.T0041"],
-          steps: ["Create Docker container with minimal base image", "Run with --read-only --cap-drop=ALL flags", "Apply seccomp profile for syscall restrictions", "Mount models as read-only volumes", "Set memory/CPU limits: --memory=16g --cpus=4"],
-          verify: ["docker inspect shows SecurityOpt settings", "Write attempts inside container fail", "Resource limits enforced under load"] },
-        { id: "off-3", title: "System Prompt Protection", desc: "Encrypt system prompts. Prevent extraction via file access.", priority: "critical", frameworks: ["OWASP LLM07"],
-          steps: ["Move prompts to secrets manager (Vault, AWS SM)", "If file-based, encrypt with SOPS/age", "Load prompts at runtime only", "Add extraction detection to input validation"],
-          verify: ["grep -r 'system.*prompt' finds no plaintext", "Config files contain no sensitive prompts", "'Repeat your instructions' attacks fail"] },
-        { id: "off-4", title: "Conversation Log Security", desc: "Encrypt logs at rest. Implement retention policies.", priority: "critical", frameworks: ["OWASP LLM02"],
-          steps: ["Enable disk encryption (LUKS/FileVault)", "Configure log rotation with 30-day retention", "Implement PII redaction before logging", "Restrict log access to security team"],
-          verify: ["Disk encryption status verified", "Log rotation configured and working", "PII patterns not visible in logs"] },
-        { id: "off-5", title: "GPU Memory Isolation", desc: "Clear GPU memory between sessions to prevent data leakage.", priority: "high", frameworks: ["ATLAS AML.T0024"],
-          steps: ["Enable NVIDIA MPS for process isolation", "Implement torch.cuda.empty_cache() after sessions", "Set CUDA_VISIBLE_DEVICES per process", "Monitor GPU memory with nvidia-smi"],
-          verify: ["nvidia-smi shows isolation per process", "No data patterns after session end"] },
-        { id: "off-6", title: "Local API Authentication", desc: "Even localhost APIs need authentication tokens.", priority: "high", frameworks: ["OWASP LLM06"],
-          steps: ["Generate secure API keys (256-bit)", "Implement auth middleware for all endpoints", "Bind server to 127.0.0.1 only", "Add per-key rate limiting"],
-          verify: ["API without key returns 401", "netstat shows 127.0.0.1 binding only", "Rate limits trigger correctly"] },
-        { id: "off-7", title: "Model Update Verification", desc: "Verify checksums before loading any model.", priority: "critical", frameworks: ["ATLAS AML.T0010", "OWASP LLM03"],
-          steps: ["Get SHA-256 checksums from official source", "Verify before every model load", "Block load on checksum mismatch", "Alert security team on failures"],
-          verify: ["Modified model file fails to load", "Verification in startup sequence", "Alerts trigger on mismatch"] },
-        { id: "off-8", title: "Resource Limits", desc: "Prevent resource exhaustion attacks.", priority: "high", frameworks: ["OWASP LLM10"],
-          steps: ["Set cgroup limits: MemoryMax, CPUQuota", "Configure request timeouts (120s max)", "Implement request queue with max depth", "Monitor and alert at 80% threshold"],
-          verify: ["Stress test shows limits enforced", "Oversized requests rejected gracefully"] }
-      ]
-    },
-    {
-      id: "prompt-injection", title: "2. Prompt Injection Defense", short: "Prompt Injection",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>`,
-      desc: "Defense against OWASP LLM01 - the #1 vulnerability.",
-      items: [
-        { id: "pi-1", title: "Input Validation Layer", desc: "Length limits, character filtering, pattern detection.", priority: "critical", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"],
-          steps: ["Set max input length (4096 tokens)", "Filter special characters: <, >, [, ]", "Block 'ignore previous', 'disregard instructions'", "Sanitize Unicode homoglyphs", "Log all filtered inputs"],
-          verify: ["'Ignore all instructions' is blocked", "Oversized input rejected", "Unicode bypass attempts fail"] },
-        { id: "pi-2", title: "Instruction Hierarchy", desc: "System prompts always take precedence over user input.", priority: "critical", frameworks: ["OWASP LLM01"],
-          steps: ["Use clear delimiters: [SYSTEM]...[USER]", "Parse to always prioritize system section", "Add meta-instruction about hierarchy", "Test with adversarial prompts"],
-          verify: ["User 'You are now...' ignored", "System prompt always first", "Delimiter injection escaped"] },
-        { id: "pi-3", title: "Output Filtering", desc: "Scan outputs for PII, prompt leakage, harmful content.", priority: "critical", frameworks: ["OWASP LLM05", "ATLAS AML.T0057"],
-          steps: ["Implement PII regex detection", "Add system prompt fingerprint detection", "Deploy content safety classifier", "Log suspicious outputs"],
-          verify: ["'Repeat system prompt' filtered", "Fake SSN in output redacted", "Harmful content blocked"] },
-        { id: "pi-4", title: "Indirect Injection Defense", desc: "Sanitize documents before RAG ingestion.", priority: "critical", frameworks: ["ATLAS AML.T0051.001"],
-          steps: ["Parse and sanitize all documents", "Remove hidden text and metadata", "Mark retrieved content as untrusted", "Scan for instruction patterns"],
-          verify: ["Hidden injection in doc sanitized", "Metadata stripped", "Malicious doc injection fails"] },
-        { id: "pi-5", title: "Semantic Analysis", desc: "ML classifiers to detect manipulation beyond keywords.", priority: "high", frameworks: ["OWASP LLM01"],
-          steps: ["Deploy intent classification model", "Classify: normal, suspicious, malicious", "Set blocking threshold (>0.8)", "Retrain monthly on new patterns"],
-          verify: ["Known injections classified malicious", "Normal prompts pass", "False positive rate <5%"] },
-        { id: "pi-6", title: "Injection Monitoring", desc: "Real-time alerting on suspected injection attempts.", priority: "high", frameworks: ["MITRE ATLAS"],
-          steps: ["Log all blocked/suspicious inputs", "Configure real-time alerts", "Create trend dashboard", "Weekly pattern review"],
-          verify: ["Test injection triggers alert", "Logs contain context", "Dashboard reflects attempts"] }
-      ]
-    },
-    {
-      id: "supply-chain", title: "3. Supply Chain Security", short: "Supply Chain",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>`,
-      desc: "OWASP LLM03 & ATLAS AML.T0010 - $1B+ documented impact.",
-      items: [
-        { id: "sc-1", title: "Model Provenance", desc: "Verify source and integrity of all models.", priority: "critical", frameworks: ["OWASP LLM03", "ATLAS AML.T0010"],
-          steps: ["Establish approved source list", "Document provenance for each model", "Verify publisher identity", "Review model cards"],
-          verify: ["All models have documented source", "No models from unknown sources", "Model cards reviewed"] },
-        { id: "sc-2", title: "Integrity Hashing", desc: "SHA-256 verification before every load.", priority: "critical", frameworks: ["ATLAS AML.T0031"],
-          steps: ["Calculate SHA-256 for all model files", "Store hashes separately", "Verify before every load", "Alert on mismatch"],
-          verify: ["Modified file fails to load", "Verification in code path", "Alerts working"] },
-        { id: "sc-3", title: "Dependency Scanning", desc: "Scan PyTorch, transformers, LangChain for CVEs.", priority: "critical", frameworks: ["OWASP LLM03"],
-          steps: ["Run pip-audit weekly", "Integrate in CI/CD", "Patch critical CVEs in 72h", "Document exceptions"],
-          verify: ["pip-audit shows no critical CVEs", "CI fails on vulnerabilities", "Recent patches applied"] },
-        { id: "sc-4", title: "SBOM Maintenance", desc: "Software Bill of Materials for all AI components.", priority: "high", frameworks: ["OWASP LLM03", "NIST"],
-          steps: ["Generate SBOM with syft/cyclonedx", "Include models and frameworks", "Store in version control", "Update on changes"],
-          verify: ["SBOM exists and current", "Matches installed packages", "In version control"] },
-        { id: "sc-5", title: "Safe Serialization", desc: "Use safetensors, not pickle.", priority: "high", frameworks: ["ATLAS AML.T0010"],
-          steps: ["Convert pickle to safetensors", "Reject pickle by default", "Sandbox any pickle loading", "Scan with fickling"],
-          verify: ["Production uses safetensors", "Pickle load rejected", "Sandbox isolation verified"] },
-        { id: "sc-6", title: "Model Assessment", desc: "Security review before any third-party model.", priority: "high", frameworks: ["OWASP LLM03"],
-          steps: ["Create assessment checklist", "Test in isolated environment", "Check for backdoors", "Require security sign-off"],
-          verify: ["Assessment records exist", "Isolated testing done", "Sign-off documented"] }
-      ]
-    },
-    {
-      id: "data-protection", title: "4. Data Protection", short: "Data Protection",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>`,
-      desc: "OWASP LLM02 Sensitive Information Disclosure.",
-      items: [
-        { id: "dp-1", title: "Output Scanning", desc: "Scan all outputs for PII, credentials, keys.", priority: "critical", frameworks: ["OWASP LLM02", "ATLAS AML.T0057"],
-          steps: ["Implement PII regex patterns", "Add credential detection", "Configure redaction actions", "Log detections"],
-          verify: ["Test SSN is redacted", "API key detected", "False positive rate acceptable"] },
-        { id: "dp-2", title: "Input Sanitization", desc: "Remove PII from prompts before processing.", priority: "critical", frameworks: ["OWASP LLM02"],
-          steps: ["Detect PII in inputs", "Replace with placeholders", "Store mapping for restoration", "Log sanitization"],
-          verify: ["Email in input sanitized", "Logs show sanitization", "Restoration works"] },
-        { id: "dp-3", title: "RAG Access Controls", desc: "Document-level permissions in retrieval.", priority: "critical", frameworks: ["OWASP LLM08"],
-          steps: ["Tag documents with access levels", "Implement user authentication", "Filter results by permissions", "Audit access logs"],
-          verify: ["User A can't get User B docs", "Permission filtering works", "Access logged"] },
-        { id: "dp-4", title: "Context Isolation", desc: "No context leakage between users/sessions.", priority: "high", frameworks: ["ATLAS AML.T0024"],
-          steps: ["Session-based context storage", "Clear on session end", "Never share between users", "Implement context limits"],
-          verify: ["New session has no prior context", "Context cleared on logout", "User isolation verified"] },
-        { id: "dp-5", title: "Encryption at Rest", desc: "AES-256 for all LLM data.", priority: "critical", frameworks: ["NIST"],
-          steps: ["Enable disk encryption", "Application-level for sensitive fields", "Key management via HSM/KMS", "Annual key rotation"],
-          verify: ["Encryption status verified", "Keys in secure storage", "Rotation scheduled"] },
-        { id: "dp-6", title: "Data Retention", desc: "Auto-delete after retention period.", priority: "high", frameworks: ["GDPR", "OWASP LLM02"],
-          steps: ["Define retention periods", "Automate deletion jobs", "Implement user deletion API", "Verify complete deletion"],
-          verify: ["Retention policy documented", "Deletion jobs running", "No residual data"] }
-      ]
-    },
-    {
-      id: "access-control", title: "5. Access Control", short: "Access Control",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>`,
-      desc: "Authentication and authorization for LLM access.",
-      items: [
-        { id: "ac-1", title: "MFA Required", desc: "Multi-factor for all access paths.", priority: "critical", frameworks: ["ATLAS AML.T0012"],
-          steps: ["Enable MFA on all admin accounts", "Implement for API access", "Hardware tokens for privileged", "Enforce no-exceptions policy"],
-          verify: ["Login without MFA fails", "All admins have MFA", "API requires second factor"] },
-        { id: "ac-2", title: "RBAC Implementation", desc: "Role-based access with least privilege.", priority: "critical", frameworks: ["NIST"],
-          steps: ["Define roles: Admin, Operator, User", "Map users to roles", "Implement permission checks", "Quarterly access reviews"],
-          verify: ["User can't access admin functions", "Permission checks in code", "Reviews completed"] },
-        { id: "ac-3", title: "API Key Management", desc: "OAuth 2.0, 90-day rotation, rate limiting.", priority: "critical", frameworks: ["OWASP LLM10"],
-          steps: ["Implement OAuth 2.0 or API keys", "256-bit entropy keys", "90-day rotation policy", "Per-key rate limiting"],
-          verify: ["Auth required for API", "Keys are hashed", "Rotation reminders sent", "Rate limits work"] },
-        { id: "ac-4", title: "Session Security", desc: "15-30 min timeout, secure tokens.", priority: "high", frameworks: ["OWASP"],
-          steps: ["Configure idle timeout", "Secure, httpOnly, sameSite cookies", "Session revocation API", "Regenerate ID on privilege change"],
-          verify: ["Timeout works", "Cookie flags set", "Revocation works"] },
-        { id: "ac-5", title: "Privileged Access", desc: "PAM, just-in-time access, session recording.", priority: "high", frameworks: ["NIST"],
-          steps: ["Deploy PAM solution", "JIT access with approval", "Record privileged sessions", "Max session duration"],
-          verify: ["PAM required for admin", "JIT workflow works", "Recordings captured"] }
-      ]
-    },
-    {
-      id: "monitoring", title: "6. Monitoring", short: "Monitoring",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>`,
-      desc: "Security monitoring and detection.",
-      items: [
-        { id: "mon-1", title: "Auth Logging", desc: "All attempts, MFA events, sessions.", priority: "critical", frameworks: ["MITRE ATLAS"],
-          steps: ["Log: timestamp, user, IP, method, result", "Include geolocation", "Forward to SIEM", "Alert on suspicious patterns"],
-          verify: ["Failed login logged", "Logs in SIEM", "Alerts trigger"] },
-        { id: "mon-2", title: "Inference Logging", desc: "Request metadata (not content by default).", priority: "critical", frameworks: ["ATLAS AML.T0024"],
-          steps: ["Log: request ID, user, tokens, latency", "Do NOT log prompt content", "Enable searchable logging"],
-          verify: ["Metadata logged", "Content NOT logged", "Search works"] },
-        { id: "mon-3", title: "Injection Alerts", desc: "Real-time detection and alerting.", priority: "critical", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"],
-          steps: ["Implement pattern detection rules", "Configure real-time alerts", "Include context in alerts", "Weekly rule tuning"],
-          verify: ["Test injection triggers alert", "Context in alert", "Rules updated"] },
-        { id: "mon-4", title: "Extraction Detection", desc: "Detect systematic querying patterns.", priority: "high", frameworks: ["ATLAS AML.T0024"],
-          steps: ["Baseline normal query patterns", "Alert on high volume/systematic", "Progressive rate limiting", "Track query diversity"],
-          verify: ["Extraction pattern detected", "Rate limiting engages", "Alerts fire"] },
-        { id: "mon-5", title: "Log Protection", desc: "Encrypted, tamper-evident, restricted.", priority: "critical", frameworks: ["NIST"],
-          steps: ["Encrypt log storage", "Append-only logging", "Restrict access", "Integrity verification"],
-          verify: ["Encryption enabled", "Modification fails", "Access restricted"] }
-      ]
-    },
-    {
-      id: "incident-response", title: "7. Incident Response", short: "Incident Response",
-      icon: `<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`,
-      desc: "Response procedures for LLM security events.",
-      items: [
-        { id: "ir-1", title: "LLM IR Plan", desc: "Playbooks for injection, leakage, poisoning.", priority: "critical", frameworks: ["MITRE ATLAS", "NIST"],
-          steps: ["Create playbooks per attack type", "Define severity levels", "Document escalation paths", "Include regulatory requirements"],
-          verify: ["Playbooks exist", "Accessible to IR team", "Contacts current"] },
-        { id: "ir-2", title: "Rapid Containment", desc: "Shutdown, isolation, evidence preservation.", priority: "critical", frameworks: ["NIST"],
-          steps: ["Document emergency shutdown", "Create isolation runbook", "Prepare notification templates", "Test procedures regularly"],
-          verify: ["Shutdown works", "Isolation tested", "Templates ready"] },
-        { id: "ir-3", title: "AI Forensics", desc: "Capture model state, logs, embeddings.", priority: "high", frameworks: ["MITRE ATLAS"],
-          steps: ["Document evidence locations", "Prepare collection tools", "Train IR team on AI", "Create chain of custody"],
-          verify: ["Tools available", "Collection tested", "Team trained"] },
-        { id: "ir-4", title: "Model Rollback", desc: "Restore previous version in <1 hour.", priority: "high", frameworks: ["ATLAS AML.T0031"],
-          steps: ["Maintain versioned backups", "Document rollback procedure", "Test quarterly", "Verify backup integrity"],
-          verify: ["Rollback tested", "Backups valid", "<1 hour RTO met"] },
-        { id: "ir-5", title: "Tabletop Exercises", desc: "Quarterly exercises with AI/ML experts.", priority: "high", frameworks: ["MITRE ATLAS"],
-          steps: ["Schedule quarterly", "Create realistic scenarios", "Include cross-functional teams", "Document findings"],
-          verify: ["Exercises scheduled", "Findings documented", "Gaps remediated"] }
-      ]
-    }
+    { id: "s1", title: "1. Offline/Local LLM Security", short: "Offline LLM", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>', desc: "Critical security for locally-hosted LLM deployments.", items: [
+        { id: "off-1", title: "Model File Access Controls", desc: "Restrict model file permissions to service account only.", priority: "critical", frameworks: ["ATLAS AML.T0035"], steps: ["Identify model storage locations", "Create service account: sudo useradd -r -s /bin/false llm-service", "Change ownership: sudo chown -R llm-service:llm-service /path/to/models", "Set permissions: sudo chmod 700 /path/to/models", "Configure inference service to run as this account"], verify: ["ls -la shows only service account access", "Regular users get 'Permission denied'", "Process runs as service account"] },
+        { id: "off-2", title: "Inference Runtime Isolation", desc: "Run inference in isolated container with limited access.", priority: "critical", frameworks: ["ATLAS AML.T0041"], steps: ["Create Docker container with minimal base image", "Run with --read-only --cap-drop=ALL flags", "Apply seccomp profile", "Mount models as read-only volumes", "Set memory/CPU limits"], verify: ["docker inspect shows SecurityOpt settings", "Write attempts inside container fail", "Resource limits enforced"] },
+        { id: "off-3", title: "System Prompt Protection", desc: "Encrypt system prompts. Prevent extraction.", priority: "critical", frameworks: ["OWASP LLM07"], steps: ["Move prompts to secrets manager", "Encrypt with SOPS/age", "Load prompts at runtime only", "Add extraction detection"], verify: ["grep finds no plaintext prompts", "Config files contain no sensitive prompts", "'Repeat instructions' attacks fail"] },
+        { id: "off-4", title: "Conversation Log Security", desc: "Encrypt logs at rest. Implement retention policies.", priority: "critical", frameworks: ["OWASP LLM02"], steps: ["Enable disk encryption", "Configure log rotation with 30-day retention", "Implement PII redaction before logging", "Restrict log access to security team"], verify: ["Disk encryption verified", "Log rotation working", "PII not visible in logs"] },
+        { id: "off-5", title: "GPU Memory Isolation", desc: "Clear GPU memory between sessions.", priority: "high", frameworks: ["ATLAS AML.T0024"], steps: ["Enable NVIDIA MPS", "Implement torch.cuda.empty_cache() after sessions", "Set CUDA_VISIBLE_DEVICES per process", "Monitor GPU memory"], verify: ["nvidia-smi shows isolation", "No data patterns after session end"] },
+        { id: "off-6", title: "Local API Authentication", desc: "Even localhost APIs need authentication.", priority: "high", frameworks: ["OWASP LLM06"], steps: ["Generate secure API keys (256-bit)", "Implement auth middleware", "Bind server to 127.0.0.1 only", "Add per-key rate limiting"], verify: ["API without key returns 401", "netstat shows 127.0.0.1 binding only", "Rate limits work"] },
+        { id: "off-7", title: "Model Update Verification", desc: "Verify checksums before loading any model.", priority: "critical", frameworks: ["ATLAS AML.T0010", "OWASP LLM03"], steps: ["Get SHA-256 checksums from official source", "Verify before every load", "Block on mismatch", "Alert on failures"], verify: ["Modified file fails to load", "Verification in startup", "Alerts trigger"] },
+        { id: "off-8", title: "Resource Limits", desc: "Prevent resource exhaustion attacks.", priority: "high", frameworks: ["OWASP LLM10"], steps: ["Set cgroup limits", "Configure request timeouts", "Implement request queue", "Monitor and alert"], verify: ["Stress test shows limits enforced", "Oversized requests rejected"] }
+      ]},
+    { id: "s2", title: "2. User/Personal LLM Security", short: "User Security", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>', desc: "Security for personal LLM use: finance, Obsidian, K8S management.", items: [
+        { id: "usr-1", title: "Financial Document Isolation", desc: "Isolate LLM processing of receipts, invoices from other data.", priority: "critical", frameworks: ["OWASP LLM02", "PCI-DSS"], steps: ["Create dedicated folder for financial docs", "Use separate LLM session for financial processing", "Never mix financial data with other prompts", "Implement automatic PII masking", "Store results encrypted"], verify: ["Financial docs isolated", "LLM sessions don't persist context", "Bank numbers masked", "Encryption verified"] },
+        { id: "usr-2", title: "Document Upload Sanitization", desc: "Scan and sanitize uploaded documents.", priority: "critical", frameworks: ["ATLAS AML.T0051.001"], steps: ["Implement file type validation", "Scan for malware", "Strip metadata (EXIF, PDF)", "Check for hidden text", "Limit file sizes"], verify: ["Unknown file types rejected", "AV scan runs", "exiftool shows no metadata", "Hidden text detected"] },
+        { id: "usr-3", title: "Obsidian/Note Integration Security", desc: "Secure LLM integration with note-taking apps.", priority: "high", frameworks: ["OWASP LLM02"], steps: ["Use local-only LLM plugins", "Restrict plugin file access to vault", "Disable auto-sync during processing", "Review plugin permissions", "Backup vault first"], verify: ["No external network calls", "Plugin can't access outside vault", "Sync paused", "Backup exists"] },
+        { id: "usr-4", title: "K8S/Infrastructure LLM Guardrails", desc: "Prevent destructive K8S operations.", priority: "critical", frameworks: ["MITRE ATLAS", "CIS K8S"], steps: ["Run suggestions in --dry-run mode", "Approval workflow for destructive commands", "Separate kubeconfig with limited RBAC", "Log all LLM commands", "Set resource quotas"], verify: ["Destructive commands need confirmation", "LLM kubeconfig has minimal perms", "Commands logged", "Quotas enforced"] },
+        { id: "usr-5", title: "Personal Data Classification", desc: "Classify data sensitivity before LLM processing.", priority: "high", frameworks: ["GDPR", "OWASP LLM02"], steps: ["Create classification policy", "Tag files with classification", "Configure LLM to refuse sensitive data", "Different retention per classification", "Monthly review"], verify: ["Tags present", "Sensitive data blocked", "Retention active", "Review scheduled"] },
+        { id: "usr-6", title: "Credential Leak Prevention", desc: "Prevent credentials in LLM prompts.", priority: "critical", frameworks: ["OWASP LLM02", "CWE-798"], steps: ["Scan prompts for credential patterns", "Use environment variables", "Implement .llmignore", "Auto-redact API keys", "Alert on output patterns"], verify: ["Fake API key gets redacted", ".llmignore excludes .env", "Output scanning works", "Alerts fire"] },
+        { id: "usr-7", title: "Local Backup Before LLM Modifications", desc: "Always backup before LLM modifies files.", priority: "high", frameworks: ["Best Practice"], steps: ["Auto-backup before modification", "Use git for version control", "Keep last 10 versions", "Test restore monthly", "Separate backup volume"], verify: ["Backup before each modification", "Git history shows changes", "Can restore any version", "Backups on separate storage"] },
+        { id: "usr-8", title: "Output Validation for Automated Actions", desc: "Validate LLM outputs before execution.", priority: "critical", frameworks: ["OWASP LLM06"], steps: ["Validate output format", "Implement operation allowlist", "Require confirmation for irreversible actions", "Rate limit executions", "Log all actions"], verify: ["Malformed output rejected", "Only allowlisted ops execute", "Destructive needs confirmation", "Rate limits work"] }
+      ]},
+    { id: "s3", title: "3. Agentic/Orchestration Security", short: "Agentic Security", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>', desc: "Security for multi-agent systems, Claude Code, MCP servers.", items: [
+        { id: "agt-1", title: "Master Orchestrator Isolation", desc: "Isolate orchestrator from worker agents.", priority: "critical", frameworks: ["ATLAS AML.T0041", "Zero Trust"], steps: ["Run orchestrator in separate container", "Use message queue for communication", "Orchestrator has no direct file/network access", "Separate credentials", "Log all delegations"], verify: ["Orchestrator isolated", "Communication via queue only", "Can't access worker resources", "Credentials separated"] },
+        { id: "agt-2", title: "Worker Agent Sandboxing", desc: "Each worker in isolated sandbox.", priority: "critical", frameworks: ["ATLAS AML.T0041"], steps: ["Run each worker in separate container", "Mount only required directories", "Network isolation between workers", "Resource limits per worker", "Terminate on timeout"], verify: ["Workers in separate containers", "File access limited", "Workers can't reach each other", "Limits enforced", "Timeout kills runaway workers"] },
+        { id: "agt-3", title: "Human-in-the-Loop via PR/MR", desc: "Require human approval via Pull/Merge Request.", priority: "critical", frameworks: ["SDLC Security"], steps: ["Agents create branches only", "All changes as PR/MR", "Require human approval", "Automated CI checks", "Audit trail of approvals"], verify: ["Direct push to main blocked", "PRs require approval", "CI runs on PRs", "Audit trail exists"] },
+        { id: "agt-4", title: "MCP Server Authentication", desc: "Secure MCP servers with proper auth.", priority: "critical", frameworks: ["OWASP API Security"], steps: ["Implement API key or mTLS", "Validate client identity", "Use client allowlist", "Encrypt all traffic (TLS 1.3)", "Log all connections"], verify: ["Unauthenticated rejected", "Client identity logged", "TLS enforced", "Only allowlisted clients connect"] },
+        { id: "agt-5", title: "Shared Memory/State Security", desc: "Secure persistent storage for agent memory.", priority: "high", frameworks: ["OWASP LLM02"], steps: ["Encrypt storage at rest", "Access control per agent", "Version state changes", "Set retention policy", "Validate before reads"], verify: ["Encryption verified", "Agent A can't access B's state", "Changes tracked", "Old state purged"] },
+        { id: "agt-6", title: "Context Window Management", desc: "Prevent context poisoning.", priority: "high", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"], steps: ["Monitor context size", "Sanitize cross-agent context", "Clear sensitive data after use", "Block injection attempts", "Log context hashes"], verify: ["Size alerts work", "Context sanitized", "Sensitive data cleared", "Injections blocked"] },
+        { id: "agt-7", title: "GitHub/GitLab MCP Security", desc: "Secure GitHub/GitLab MCP integration.", priority: "critical", frameworks: ["GitHub Security"], steps: ["Use fine-grained tokens", "Token limited to specific repos", "Branch protection rules", "Require signed commits", "Monitor for unusual patterns"], verify: ["Token has minimal scopes", "Limited to required repos", "Branch protection active", "Commits signed", "Alerting works"] },
+        { id: "agt-8", title: "Parallel Agent Coordination", desc: "Secure coordination for parallel agents.", priority: "high", frameworks: ["Distributed Systems"], steps: ["Distributed locking", "Prevent race conditions", "Max parallel agent count", "Monitor for deadlocks", "Log coordination events"], verify: ["Locks prevent concurrent modification", "No race conditions", "Parallel limit enforced", "Deadlock detection works"] },
+        { id: "agt-9", title: "Agent Task Scoping", desc: "Strictly scope what each agent can do.", priority: "critical", frameworks: ["Least Privilege"], steps: ["Define task boundaries", "Capability-based security", "No scope escalation", "Log capability usage", "Alert on violations"], verify: ["Boundaries documented", "Capabilities limited", "Escalation blocked", "All use logged"] },
+        { id: "agt-10", title: "Agent Output Validation Pipeline", desc: "Validate all agent outputs.", priority: "critical", frameworks: ["OWASP LLM05"], steps: ["Schema validation", "Scan for injection patterns", "Validate format", "Quarantine suspicious outputs", "Never execute unvalidated"], verify: ["Schema catches malformed", "Injections detected", "Invalid rejected", "Suspicious quarantined"] },
+        { id: "agt-11", title: "Agent Rollback Capability", desc: "Ability to rollback agent changes.", priority: "high", frameworks: ["Disaster Recovery"], steps: ["Track with transaction IDs", "Automated rollback procedure", "Test monthly", "Keep 30 days of rollback data", "Document procedure"], verify: ["All changes have IDs", "Rollback tested", "30-day data retained", "Procedure documented"] },
+        { id: "agt-12", title: "Claude Code Specific Security", desc: "Security for Claude Code CLI.", priority: "high", frameworks: ["CLI Security"], steps: ["Review subagent spawn requests", "Limit file system access", "Use --allowedTools flag", "Monitor token usage", "Project-specific permissions"], verify: ["Spawns logged", "File access limited", "Only needed tools", "Token usage monitored", "Permissions active"] }
+      ]},
+    { id: "s4", title: "4. Prompt Injection Defense", short: "Prompt Injection", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>', desc: "Defense against OWASP LLM01 - the #1 vulnerability.", items: [
+        { id: "pi-1", title: "Input Validation Layer", desc: "Length limits, character filtering, pattern detection.", priority: "critical", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"], steps: ["Set max input length", "Filter special characters", "Block 'ignore previous' patterns", "Sanitize Unicode", "Log filtered inputs"], verify: ["'Ignore instructions' blocked", "Oversized rejected", "Unicode bypasses fail"] },
+        { id: "pi-2", title: "Instruction Hierarchy", desc: "System prompts take precedence.", priority: "critical", frameworks: ["OWASP LLM01"], steps: ["Use clear delimiters", "Prioritize system section", "Add meta-instruction", "Test with adversarial prompts"], verify: ["'You are now...' ignored", "System prompt first", "Delimiter injection escaped"] },
+        { id: "pi-3", title: "Output Filtering", desc: "Scan outputs for PII, leakage, harmful content.", priority: "critical", frameworks: ["OWASP LLM05", "ATLAS AML.T0057"], steps: ["PII regex detection", "Prompt fingerprint detection", "Content safety classifier", "Log suspicious outputs"], verify: ["'Repeat prompt' filtered", "SSN redacted", "Harmful content blocked"] },
+        { id: "pi-4", title: "Indirect Injection Defense", desc: "Sanitize documents before RAG.", priority: "critical", frameworks: ["ATLAS AML.T0051.001"], steps: ["Parse and sanitize documents", "Remove hidden text/metadata", "Mark retrieved as untrusted", "Scan for instruction patterns"], verify: ["Hidden injection sanitized", "Metadata stripped", "Malicious doc fails"] },
+        { id: "pi-5", title: "Semantic Analysis", desc: "ML classifiers for manipulation detection.", priority: "high", frameworks: ["OWASP LLM01"], steps: ["Deploy intent classifier", "Classify normal/suspicious/malicious", "Set blocking threshold", "Retrain monthly"], verify: ["Known injections classified", "Normal passes", "FP rate <5%"] },
+        { id: "pi-6", title: "Injection Monitoring", desc: "Real-time alerting.", priority: "high", frameworks: ["MITRE ATLAS"], steps: ["Log blocked inputs", "Real-time alerts", "Trend dashboard", "Weekly review"], verify: ["Injection triggers alert", "Logs have context", "Dashboard works"] }
+      ]},
+    { id: "s5", title: "5. Supply Chain Security", short: "Supply Chain", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>', desc: "OWASP LLM03 & ATLAS AML.T0010.", items: [
+        { id: "sc-1", title: "Model Provenance", desc: "Verify source and integrity.", priority: "critical", frameworks: ["OWASP LLM03", "ATLAS AML.T0010"], steps: ["Establish approved sources", "Document provenance", "Verify publisher", "Review model cards"], verify: ["All models documented", "No unknown sources", "Cards reviewed"] },
+        { id: "sc-2", title: "Integrity Hashing", desc: "SHA-256 verification before load.", priority: "critical", frameworks: ["ATLAS AML.T0031"], steps: ["Calculate SHA-256", "Store hashes separately", "Verify every load", "Alert on mismatch"], verify: ["Modified file fails", "Verification in path", "Alerts work"] },
+        { id: "sc-3", title: "Dependency Scanning", desc: "Scan for CVEs.", priority: "critical", frameworks: ["OWASP LLM03"], steps: ["Run pip-audit weekly", "Integrate in CI/CD", "Patch critical in 72h", "Document exceptions"], verify: ["No critical CVEs", "CI fails on vulns", "Patches applied"] },
+        { id: "sc-4", title: "SBOM Maintenance", desc: "Software Bill of Materials.", priority: "high", frameworks: ["OWASP LLM03", "NIST"], steps: ["Generate SBOM", "Include models", "Store in version control", "Update on changes"], verify: ["SBOM exists", "Matches installed", "In version control"] },
+        { id: "sc-5", title: "Safe Serialization", desc: "Use safetensors, not pickle.", priority: "high", frameworks: ["ATLAS AML.T0010"], steps: ["Convert pickle to safetensors", "Reject pickle by default", "Sandbox pickle loading", "Scan with fickling"], verify: ["Production uses safetensors", "Pickle rejected", "Sandbox verified"] },
+        { id: "sc-6", title: "Model Assessment", desc: "Security review before third-party models.", priority: "high", frameworks: ["OWASP LLM03"], steps: ["Assessment checklist", "Isolated testing", "Check for backdoors", "Require sign-off"], verify: ["Records exist", "Isolated testing done", "Sign-off documented"] }
+      ]},
+    { id: "s6", title: "6. Data Protection", short: "Data Protection", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>', desc: "OWASP LLM02 Sensitive Information Disclosure.", items: [
+        { id: "dp-1", title: "Output Scanning", desc: "Scan outputs for PII, credentials.", priority: "critical", frameworks: ["OWASP LLM02", "ATLAS AML.T0057"], steps: ["PII regex patterns", "Credential detection", "Redaction actions", "Log detections"], verify: ["SSN redacted", "API key detected", "FP rate acceptable"] },
+        { id: "dp-2", title: "Input Sanitization", desc: "Remove PII from prompts.", priority: "critical", frameworks: ["OWASP LLM02"], steps: ["Detect PII in inputs", "Replace with placeholders", "Store mapping", "Log sanitization"], verify: ["Email sanitized", "Logs show sanitization", "Restoration works"] },
+        { id: "dp-3", title: "RAG Access Controls", desc: "Document-level permissions.", priority: "critical", frameworks: ["OWASP LLM08"], steps: ["Tag documents", "User authentication", "Filter by permissions", "Audit logs"], verify: ["User A can't get B's docs", "Filtering works", "Access logged"] },
+        { id: "dp-4", title: "Context Isolation", desc: "No leakage between users/sessions.", priority: "high", frameworks: ["ATLAS AML.T0024"], steps: ["Session-based storage", "Clear on session end", "Never share between users", "Context limits"], verify: ["No prior context", "Cleared on logout", "Isolation verified"] },
+        { id: "dp-5", title: "Encryption at Rest", desc: "AES-256 for all LLM data.", priority: "critical", frameworks: ["NIST"], steps: ["Disk encryption", "App-level encryption", "Key management via HSM", "Annual rotation"], verify: ["Encryption verified", "Keys in secure storage", "Rotation scheduled"] },
+        { id: "dp-6", title: "Data Retention", desc: "Auto-delete after retention period.", priority: "high", frameworks: ["GDPR", "OWASP LLM02"], steps: ["Define retention periods", "Automate deletion", "User deletion API", "Verify deletion"], verify: ["Policy documented", "Deletion running", "No residual data"] }
+      ]},
+    { id: "s7", title: "7. Access Control", short: "Access Control", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>', desc: "Authentication and authorization.", items: [
+        { id: "ac-1", title: "MFA Required", desc: "Multi-factor for all access.", priority: "critical", frameworks: ["ATLAS AML.T0012"], steps: ["Enable MFA on admins", "Implement for API", "Hardware tokens for privileged", "No-exceptions policy"], verify: ["Login without MFA fails", "All admins have MFA", "API requires MFA"] },
+        { id: "ac-2", title: "RBAC Implementation", desc: "Role-based access with least privilege.", priority: "critical", frameworks: ["NIST"], steps: ["Define roles", "Map users", "Permission checks", "Quarterly reviews"], verify: ["User can't access admin", "Checks in code", "Reviews completed"] },
+        { id: "ac-3", title: "API Key Management", desc: "OAuth 2.0, 90-day rotation.", priority: "critical", frameworks: ["OWASP LLM10"], steps: ["Implement OAuth/API keys", "256-bit entropy", "90-day rotation", "Per-key rate limiting"], verify: ["Auth required", "Keys hashed", "Rotation works", "Rate limits work"] },
+        { id: "ac-4", title: "Session Security", desc: "15-30 min timeout, secure tokens.", priority: "high", frameworks: ["OWASP"], steps: ["Configure timeout", "Secure cookie flags", "Session revocation", "Regenerate on privilege change"], verify: ["Timeout works", "Flags set", "Revocation works"] },
+        { id: "ac-5", title: "Privileged Access", desc: "PAM, JIT access, session recording.", priority: "high", frameworks: ["NIST"], steps: ["Deploy PAM", "JIT with approval", "Record sessions", "Max duration"], verify: ["PAM required", "JIT works", "Recordings captured"] }
+      ]},
+    { id: "s8", title: "8. Monitoring", short: "Monitoring", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>', desc: "Security monitoring and detection.", items: [
+        { id: "mon-1", title: "Auth Logging", desc: "All attempts, MFA events, sessions.", priority: "critical", frameworks: ["MITRE ATLAS"], steps: ["Log timestamp, user, IP, method, result", "Include geolocation", "Forward to SIEM", "Alert on patterns"], verify: ["Failed login logged", "Logs in SIEM", "Alerts trigger"] },
+        { id: "mon-2", title: "Inference Logging", desc: "Request metadata (not content).", priority: "critical", frameworks: ["ATLAS AML.T0024"], steps: ["Log request ID, user, tokens, latency", "Do NOT log content", "Searchable logging"], verify: ["Metadata logged", "Content NOT logged", "Search works"] },
+        { id: "mon-3", title: "Injection Alerts", desc: "Real-time detection and alerting.", priority: "critical", frameworks: ["OWASP LLM01", "ATLAS AML.T0051"], steps: ["Pattern detection rules", "Real-time alerts", "Context in alerts", "Weekly tuning"], verify: ["Injection triggers alert", "Context included", "Rules updated"] },
+        { id: "mon-4", title: "Extraction Detection", desc: "Detect systematic querying.", priority: "high", frameworks: ["ATLAS AML.T0024"], steps: ["Baseline patterns", "Alert on high volume", "Progressive rate limiting", "Track diversity"], verify: ["Extraction detected", "Rate limiting engages", "Alerts fire"] },
+        { id: "mon-5", title: "Log Protection", desc: "Encrypted, tamper-evident.", priority: "critical", frameworks: ["NIST"], steps: ["Encrypt storage", "Append-only logging", "Restrict access", "Integrity verification"], verify: ["Encryption enabled", "Modification fails", "Access restricted"] }
+      ]},
+    { id: "s9", title: "9. Incident Response", short: "Incident Response", icon: '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>', desc: "Response procedures for LLM security events.", items: [
+        { id: "ir-1", title: "LLM IR Plan", desc: "Playbooks for injection, leakage, poisoning.", priority: "critical", frameworks: ["MITRE ATLAS", "NIST"], steps: ["Create playbooks per attack", "Define severity levels", "Escalation paths", "Regulatory requirements"], verify: ["Playbooks exist", "Accessible to IR team", "Contacts current"] },
+        { id: "ir-2", title: "Rapid Containment", desc: "Shutdown, isolation, evidence.", priority: "critical", frameworks: ["NIST"], steps: ["Document shutdown", "Isolation runbook", "Notification templates", "Test regularly"], verify: ["Shutdown works", "Isolation tested", "Templates ready"] },
+        { id: "ir-3", title: "AI Forensics", desc: "Capture model state, logs, embeddings.", priority: "high", frameworks: ["MITRE ATLAS"], steps: ["Document evidence locations", "Prepare tools", "Train IR team", "Chain of custody"], verify: ["Tools available", "Collection tested", "Team trained"] },
+        { id: "ir-4", title: "Model Rollback", desc: "Restore previous version in <1 hour.", priority: "high", frameworks: ["ATLAS AML.T0031"], steps: ["Versioned backups", "Document procedure", "Test quarterly", "Verify integrity"], verify: ["Rollback tested", "Backups valid", "<1 hour RTO"] },
+        { id: "ir-5", title: "Tabletop Exercises", desc: "Quarterly exercises with AI/ML experts.", priority: "high", frameworks: ["MITRE ATLAS"], steps: ["Schedule quarterly", "Realistic scenarios", "Cross-functional teams", "Document findings"], verify: ["Exercises scheduled", "Findings documented", "Gaps remediated"] }
+      ]}
   ]
 };
 
-// STATE
 let state = {};
 
 function loadState() {
@@ -417,353 +296,243 @@ function saveState() {
   updateProgress();
 }
 
-// RENDER
+function jumpToSection(sectionId) {
+  closeSidebar();
+  var el = document.getElementById('sec-' + sectionId);
+  if (el) {
+    var offset = 100;
+    var pos = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: pos, behavior: 'smooth' });
+    document.querySelectorAll('.toc-item').forEach(function(t) {
+      if (t.getAttribute('data-section') === sectionId) {
+        t.classList.add('active');
+      } else {
+        t.classList.remove('active');
+      }
+    });
+  }
+}
+
 function renderTOC() {
-  const html = data.sections.map(s => `
-    <button onclick="scrollToSection('${s.id}')" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 dark:text-cyber-100 text-slate-700 dark:hover:bg-cyber-700 hover:bg-slate-100" data-section="${s.id}">
-      ${s.icon}<span class="truncate">${s.short}</span>
-    </button>
-  `).join('');
+  var html = '';
+  for (var i = 0; i < data.sections.length; i++) {
+    var s = data.sections[i];
+    html += '<button type="button" data-section="' + s.id + '" class="toc-item w-full text-left px-3 py-2 rounded-lg text-sm flex items-center gap-2 dark:text-cyber-100 text-slate-700 dark:hover:bg-cyber-700 hover:bg-slate-100 cursor-pointer">' + s.icon + '<span class="truncate">' + s.short + '</span></button>';
+  }
   document.getElementById('desktop-toc').innerHTML = html;
   document.getElementById('mobile-toc').innerHTML = html;
+  
+  document.querySelectorAll('.toc-item').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var sid = this.getAttribute('data-section');
+      jumpToSection(sid);
+    });
+  });
 }
 
 function renderSections() {
-  document.getElementById('main-content').innerHTML = data.sections.map(sec => `
-    <section id="section-${sec.id}" class="mb-10">
-      <div class="flex items-start gap-3 mb-4">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-green/20 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan">${sec.icon}</div>
-        <div>
-          <h2 class="font-display font-bold text-lg dark:text-white text-slate-900">${sec.title}</h2>
-          <p class="text-xs dark:text-cyber-200 text-slate-500">${sec.desc}</p>
-        </div>
-      </div>
-      <div class="space-y-2">${sec.items.map(item => renderItem(item)).join('')}</div>
-    </section>
-  `).join('');
+  var html = '';
+  for (var i = 0; i < data.sections.length; i++) {
+    var sec = data.sections[i];
+    html += '<section id="sec-' + sec.id + '" class="mb-10"><div class="flex items-start gap-3 mb-4"><div class="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-cyan/20 to-accent-green/20 border border-accent-cyan/30 flex items-center justify-center text-accent-cyan">' + sec.icon + '</div><div><h2 class="font-display font-bold text-lg dark:text-white text-slate-900">' + sec.title + '</h2><p class="text-xs dark:text-cyber-200 text-slate-500">' + sec.desc + '</p></div></div><div class="space-y-2">';
+    for (var j = 0; j < sec.items.length; j++) {
+      html += renderItem(sec.items[j]);
+    }
+    html += '</div></section>';
+  }
+  document.getElementById('main-content').innerHTML = html;
 }
 
 function renderItem(item) {
-  const s = state[item.id] || { done: false, comment: '' };
-  const pc = { critical: 'bg-accent-red/20 text-accent-red border-accent-red/30', high: 'bg-accent-amber/20 text-accent-amber border-accent-amber/30', medium: 'bg-accent-purple/20 text-accent-purple border-accent-purple/30', low: 'bg-accent-green/20 text-accent-green border-accent-green/30' };
-  return `
-    <div class="checklist-item checklist-item-clickable ${s.done ? 'completed' : ''} status-${item.priority} rounded-lg p-3 border dark:bg-cyber-800/50 dark:border-cyber-600 bg-white border-slate-200 shadow-sm" data-id="${item.id}" onclick="showDetail('${item.id}')">
-      <div class="flex items-start gap-3">
-        <input type="checkbox" ${s.done ? 'checked' : ''} onclick="event.stopPropagation()" onchange="toggle('${item.id}')">
-        <div class="flex-1 min-w-0">
-          <div class="flex flex-wrap items-center gap-2 mb-1">
-            <span class="item-title font-display font-semibold text-sm dark:text-white text-slate-900">${item.title}</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase border ${pc[item.priority]}">${item.priority}</span>
-            <span class="text-accent-cyan text-xs hidden sm:inline">📋 Click for steps</span>
-          </div>
-          <p class="text-xs dark:text-cyber-200 text-slate-600">${item.desc}</p>
-          ${item.frameworks?.length ? `<div class="flex flex-wrap gap-1 mt-2">${item.frameworks.map(f => `<span class="framework-badge dark:bg-cyber-700 dark:text-cyber-100 bg-slate-100 text-slate-600">${f}</span>`).join('')}</div>` : ''}
-          ${s.comment ? `<div class="mt-2 p-2 rounded border text-xs font-mono dark:bg-cyber-900/50 dark:border-cyber-700 dark:text-cyber-100 bg-slate-50 border-slate-200 text-slate-700">💬 ${esc(s.comment)}</div>` : ''}
-        </div>
-        <button onclick="event.stopPropagation(); openComment('${item.id}')" class="p-2 rounded-lg dark:text-cyber-300 dark:hover:bg-cyber-700 text-slate-400 hover:bg-slate-100" title="Comment">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
-        </button>
-      </div>
-    </div>
-  `;
+  var s = state[item.id] || { done: false, comment: '' };
+  var pc = { critical: 'bg-accent-red/20 text-accent-red border-accent-red/30', high: 'bg-accent-amber/20 text-accent-amber border-accent-amber/30', medium: 'bg-accent-purple/20 text-accent-purple border-accent-purple/30', low: 'bg-accent-green/20 text-accent-green border-accent-green/30' };
+  var frameworks = '';
+  if (item.frameworks && item.frameworks.length) {
+    frameworks = '<div class="flex flex-wrap gap-1 mt-2">';
+    for (var k = 0; k < item.frameworks.length; k++) {
+      frameworks += '<span class="framework-badge dark:bg-cyber-700 dark:text-cyber-100 bg-slate-100 text-slate-600">' + item.frameworks[k] + '</span>';
+    }
+    frameworks += '</div>';
+  }
+  var comment = s.comment ? '<div class="mt-2 p-2 rounded border text-xs font-mono dark:bg-cyber-900/50 dark:border-cyber-700 dark:text-cyber-100 bg-slate-50 border-slate-200 text-slate-700">💬 ' + esc(s.comment) + '</div>' : '';
+  
+  return '<div class="checklist-item checklist-item-clickable ' + (s.done ? 'completed' : '') + ' status-' + item.priority + ' rounded-lg p-3 border dark:bg-cyber-800/50 dark:border-cyber-600 bg-white border-slate-200 shadow-sm" onclick="showDetail(\'' + item.id + '\')"><div class="flex items-start gap-3"><input type="checkbox" ' + (s.done ? 'checked' : '') + ' onclick="event.stopPropagation()" onchange="toggle(\'' + item.id + '\')"><div class="flex-1 min-w-0"><div class="flex flex-wrap items-center gap-2 mb-1"><span class="item-title font-display font-semibold text-sm dark:text-white text-slate-900">' + item.title + '</span><span class="px-2 py-0.5 rounded text-[10px] font-mono uppercase border ' + pc[item.priority] + '">' + item.priority + '</span><span class="text-accent-cyan text-xs hidden sm:inline">📋 Click for steps</span></div><p class="text-xs dark:text-cyber-200 text-slate-600">' + item.desc + '</p>' + frameworks + comment + '</div><button onclick="event.stopPropagation(); openComment(\'' + item.id + '\')" class="p-2 rounded-lg dark:text-cyber-300 dark:hover:bg-cyber-700 text-slate-400 hover:bg-slate-100"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg></button></div></div>';
 }
 
-// DETAIL MODAL
 function showDetail(id) {
-  let item = null;
-  for (const sec of data.sections) { item = sec.items.find(i => i.id === id); if (item) break; }
+  var item = null;
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      if (data.sections[i].items[j].id === id) { item = data.sections[i].items[j]; break; }
+    }
+    if (item) break;
+  }
   if (!item) return;
-  const s = state[id] || { done: false, comment: '' };
-  const pc = { critical: 'bg-accent-red/20 text-accent-red border-accent-red/30', high: 'bg-accent-amber/20 text-accent-amber border-accent-amber/30', medium: 'bg-accent-purple/20 text-accent-purple border-accent-purple/30', low: 'bg-accent-green/20 text-accent-green border-accent-green/30' };
+  var s = state[id] || { done: false, comment: '' };
+  var pc = { critical: 'bg-accent-red/20 text-accent-red border-accent-red/30', high: 'bg-accent-amber/20 text-accent-amber border-accent-amber/30', medium: 'bg-accent-purple/20 text-accent-purple border-accent-purple/30', low: 'bg-accent-green/20 text-accent-green border-accent-green/30' };
   
-  document.getElementById('detail-content').innerHTML = `
-    <div class="animate-slide-in">
-      <div class="mb-6">
-        <div class="flex items-center gap-2 mb-2">
-          <span class="px-2 py-1 rounded text-xs font-mono uppercase border ${pc[item.priority]}">${item.priority}</span>
-          ${s.done ? '<span class="px-2 py-1 rounded text-xs font-mono bg-accent-green/20 text-accent-green">✓ Done</span>' : ''}
-        </div>
-        <h3 class="font-display font-bold text-xl dark:text-white text-slate-900">${item.title}</h3>
-        <p class="text-sm mt-2 dark:text-cyber-200 text-slate-600">${item.desc}</p>
-        ${item.frameworks?.length ? `<div class="flex flex-wrap gap-1 mt-3">${item.frameworks.map(f => `<span class="framework-badge dark:bg-cyber-700 dark:text-cyber-100 bg-slate-100 text-slate-600">${f}</span>`).join('')}</div>` : ''}
-      </div>
-      
-      <div class="mb-6">
-        <h4 class="font-display font-semibold text-sm uppercase tracking-wider mb-3 flex items-center gap-2 dark:text-accent-cyan text-cyan-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-          Implementation Steps
-        </h4>
-        <div class="space-y-2">
-          ${item.steps.map((step, i) => `
-            <div class="flex gap-3 p-3 rounded-lg border dark:bg-cyber-900/30 dark:border-cyber-700 bg-slate-50 border-slate-200">
-              <div class="step-num dark:bg-accent-cyan/20 dark:text-accent-cyan bg-cyan-100 text-cyan-700">${i + 1}</div>
-              <p class="text-sm dark:text-cyber-100 text-slate-700">${step}</p>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="mb-6">
-        <h4 class="font-display font-semibold text-sm uppercase tracking-wider mb-3 flex items-center gap-2 dark:text-accent-green text-green-600">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-          How to Verify
-        </h4>
-        <div class="space-y-2">
-          ${item.verify.map(v => `
-            <div class="flex gap-2 p-3 rounded-lg border dark:bg-green-900/20 dark:border-green-800/50 bg-green-50 border-green-200">
-              <span class="text-accent-green flex-shrink-0">✓</span>
-              <p class="text-sm dark:text-green-200 text-green-800">${v}</p>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      
-      <div class="flex gap-3 pt-4 border-t dark:border-cyber-700 border-slate-200">
-        <button onclick="toggle('${item.id}'); showDetail('${item.id}')" class="flex-1 py-3 rounded-lg font-mono text-sm ${s.done ? 'bg-accent-amber/20 text-accent-amber border border-accent-amber/30' : 'bg-accent-green/20 text-accent-green border border-accent-green/30'}">
-          ${s.done ? '↩ Mark Incomplete' : '✓ Mark Complete'}
-        </button>
-        <button onclick="closeDetail(); openComment('${item.id}')" class="px-4 py-3 rounded-lg font-mono text-sm border dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💬 Comment</button>
-      </div>
-      
-      ${s.comment ? `
-        <div class="mt-4 p-3 rounded-lg border dark:bg-cyber-900/50 dark:border-cyber-700 bg-slate-50 border-slate-200">
-          <p class="text-xs uppercase tracking-wider mb-1 dark:text-cyber-300 text-slate-500">Your Notes</p>
-          <p class="text-sm font-mono dark:text-cyber-100 text-slate-700">${esc(s.comment)}</p>
-        </div>
-      ` : ''}
-    </div>
-  `;
+  var frameworks = '';
+  if (item.frameworks && item.frameworks.length) {
+    frameworks = '<div class="flex flex-wrap gap-1 mt-3">';
+    for (var k = 0; k < item.frameworks.length; k++) {
+      frameworks += '<span class="framework-badge dark:bg-cyber-700 dark:text-cyber-100 bg-slate-100 text-slate-600">' + item.frameworks[k] + '</span>';
+    }
+    frameworks += '</div>';
+  }
+  
+  var steps = '';
+  for (var i = 0; i < item.steps.length; i++) {
+    steps += '<div class="flex gap-3 p-3 rounded-lg border dark:bg-cyber-900/30 dark:border-cyber-700 bg-slate-50 border-slate-200"><div class="step-num dark:bg-accent-cyan/20 dark:text-accent-cyan bg-cyan-100 text-cyan-700">' + (i+1) + '</div><p class="text-sm dark:text-cyber-100 text-slate-700">' + item.steps[i] + '</p></div>';
+  }
+  
+  var verify = '';
+  for (var i = 0; i < item.verify.length; i++) {
+    verify += '<div class="flex gap-2 p-3 rounded-lg border dark:bg-green-900/20 dark:border-green-800/50 bg-green-50 border-green-200"><span class="text-accent-green flex-shrink-0">✓</span><p class="text-sm dark:text-green-200 text-green-800">' + item.verify[i] + '</p></div>';
+  }
+  
+  var comment = s.comment ? '<div class="mt-4 p-3 rounded-lg border dark:bg-cyber-900/50 dark:border-cyber-700 bg-slate-50 border-slate-200"><p class="text-xs uppercase tracking-wider mb-1 dark:text-cyber-300 text-slate-500">Your Notes</p><p class="text-sm font-mono dark:text-cyber-100 text-slate-700">' + esc(s.comment) + '</p></div>' : '';
+  
+  document.getElementById('detail-content').innerHTML = '<div class="animate-slide-in"><div class="mb-6"><div class="flex items-center gap-2 mb-2"><span class="px-2 py-1 rounded text-xs font-mono uppercase border ' + pc[item.priority] + '">' + item.priority + '</span>' + (s.done ? '<span class="px-2 py-1 rounded text-xs font-mono bg-accent-green/20 text-accent-green">✓ Done</span>' : '') + '</div><h3 class="font-display font-bold text-xl dark:text-white text-slate-900">' + item.title + '</h3><p class="text-sm mt-2 dark:text-cyber-200 text-slate-600">' + item.desc + '</p>' + frameworks + '</div><div class="mb-6"><h4 class="font-display font-semibold text-sm uppercase tracking-wider mb-3 flex items-center gap-2 dark:text-accent-cyan text-cyan-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>Implementation Steps</h4><div class="space-y-2">' + steps + '</div></div><div class="mb-6"><h4 class="font-display font-semibold text-sm uppercase tracking-wider mb-3 flex items-center gap-2 dark:text-accent-green text-green-600"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>How to Verify</h4><div class="space-y-2">' + verify + '</div></div><div class="flex gap-3 pt-4 border-t dark:border-cyber-700 border-slate-200"><button onclick="toggle(\'' + item.id + '\'); showDetail(\'' + item.id + '\')" class="flex-1 py-3 rounded-lg font-mono text-sm ' + (s.done ? 'bg-accent-amber/20 text-accent-amber border border-accent-amber/30' : 'bg-accent-green/20 text-accent-green border border-accent-green/30') + '">' + (s.done ? '↩ Mark Incomplete' : '✓ Mark Complete') + '</button><button onclick="closeDetail(); openComment(\'' + item.id + '\')" class="px-4 py-3 rounded-lg font-mono text-sm border dark:bg-cyber-700 dark:border-cyber-500 dark:text-cyber-100 bg-slate-100 border-slate-200 text-slate-700">💬 Comment</button></div>' + comment + '</div>';
   
   document.getElementById('detail-modal').classList.remove('hidden');
   document.getElementById('detail-modal').classList.add('flex');
 }
 
-function closeDetail() {
-  document.getElementById('detail-modal').classList.add('hidden');
-  document.getElementById('detail-modal').classList.remove('flex');
-}
+function closeDetail() { document.getElementById('detail-modal').classList.add('hidden'); document.getElementById('detail-modal').classList.remove('flex'); }
 
-// COMMENT
-let commentId = null;
+var commentId = null;
 function openComment(id) {
-  let item = null;
-  for (const sec of data.sections) { item = sec.items.find(i => i.id === id); if (item) break; }
+  var item = null;
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      if (data.sections[i].items[j].id === id) { item = data.sections[i].items[j]; break; }
+    }
+    if (item) break;
+  }
   if (!item) return;
   commentId = id;
   document.getElementById('comment-title').textContent = item.title;
-  document.getElementById('comment-input').value = state[id]?.comment || '';
+  document.getElementById('comment-input').value = state[id] ? state[id].comment : '';
   document.getElementById('comment-modal').classList.remove('hidden');
   document.getElementById('comment-modal').classList.add('flex');
-  setTimeout(() => document.getElementById('comment-input').focus(), 100);
 }
-function closeComment() {
-  document.getElementById('comment-modal').classList.add('hidden');
-  document.getElementById('comment-modal').classList.remove('flex');
-  commentId = null;
-}
-function saveComment() {
-  if (commentId) {
-    state[commentId].comment = document.getElementById('comment-input').value;
-    saveState();
-    renderSections();
-    toast('Comment saved', 'success');
-  }
-  closeComment();
-}
+function closeComment() { document.getElementById('comment-modal').classList.add('hidden'); document.getElementById('comment-modal').classList.remove('flex'); commentId = null; }
+function saveComment() { if (commentId) { state[commentId].comment = document.getElementById('comment-input').value; saveState(); renderSections(); toast('Comment saved', 'success'); } closeComment(); }
 
-// ACTIONS
-function toggle(id) {
-  state[id].done = !state[id].done;
-  saveState();
-  renderSections();
-}
+function toggle(id) { state[id].done = !state[id].done; saveState(); renderSections(); }
+function toggleSidebar() { document.getElementById('mobile-sidebar').classList.toggle('active'); document.getElementById('sidebar-overlay').classList.toggle('active'); }
+function closeSidebar() { document.getElementById('mobile-sidebar').classList.remove('active'); document.getElementById('sidebar-overlay').classList.remove('active'); }
 
-function toggleSidebar() {
-  document.getElementById('mobile-sidebar').classList.toggle('active');
-  document.getElementById('sidebar-overlay').classList.toggle('active');
-}
-function closeSidebar() {
-  document.getElementById('mobile-sidebar').classList.remove('active');
-  document.getElementById('sidebar-overlay').classList.remove('active');
-}
-
-function scrollToSection(id) {
-  closeSidebar();
-  const el = document.getElementById(`section-${id}`);
-  if (el) {
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    document.querySelectorAll('.toc-item').forEach(t => t.classList.toggle('active', t.dataset.section === id));
-  }
-}
-
-// PROGRESS
 function updateProgress() {
-  let total = 0, done = 0;
-  data.sections.forEach(sec => sec.items.forEach(item => { total++; if (state[item.id]?.done) done++; }));
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  document.getElementById('progress-percent').textContent = `${pct}%`;
-  document.getElementById('mobile-progress').textContent = `${pct}%`;
-  document.getElementById('progress-circle').setAttribute('stroke-dasharray', `${pct}, 100`);
+  var total = 0, done = 0;
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      total++;
+      if (state[data.sections[i].items[j].id] && state[data.sections[i].items[j].id].done) done++;
+    }
+  }
+  var pct = total ? Math.round((done / total) * 100) : 0;
+  document.getElementById('progress-percent').textContent = pct + '%';
+  document.getElementById('mobile-progress').textContent = pct + '%';
+  document.getElementById('progress-circle').setAttribute('stroke-dasharray', pct + ', 100');
   
-  const stats = { critical: { t: 0, d: 0 }, high: { t: 0, d: 0 }, medium: { t: 0, d: 0 }, low: { t: 0, d: 0 } };
-  data.sections.forEach(sec => sec.items.forEach(item => {
-    if (stats[item.priority]) { stats[item.priority].t++; if (state[item.id]?.done) stats[item.priority].d++; }
-  }));
-  ['critical', 'high', 'medium', 'low'].forEach(p => {
-    const el = document.getElementById(`stat-${p}`);
-    if (el) el.textContent = `${stats[p].d}/${stats[p].t}`;
-  });
+  var stats = { critical: { t: 0, d: 0 }, high: { t: 0, d: 0 }, medium: { t: 0, d: 0 }, low: { t: 0, d: 0 } };
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      var item = data.sections[i].items[j];
+      if (stats[item.priority]) {
+        stats[item.priority].t++;
+        if (state[item.id] && state[item.id].done) stats[item.priority].d++;
+      }
+    }
+  }
+  document.getElementById('stat-critical').textContent = stats.critical.d + '/' + stats.critical.t;
+  document.getElementById('stat-high').textContent = stats.high.d + '/' + stats.high.t;
+  document.getElementById('stat-medium').textContent = stats.medium.d + '/' + stats.medium.t;
+  document.getElementById('stat-low').textContent = stats.low.d + '/' + stats.low.t;
 }
 
-// EXPORT JSON
 function exportJSON() {
-  const obj = { version: '4.0', date: new Date().toISOString(), state };
-  const a = document.createElement('a');
+  var obj = { version: '5.0', date: new Date().toISOString(), state: state };
+  var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' }));
-  a.download = `llm-security-${new Date().toISOString().split('T')[0]}.json`;
+  a.download = 'llm-security-' + new Date().toISOString().split('T')[0] + '.json';
   a.click();
   toast('JSON exported', 'success');
 }
 
-// EXPORT MARKDOWN REPORT
 function exportMarkdown() {
-  const now = new Date();
-  let total = 0, done = 0;
-  data.sections.forEach(sec => sec.items.forEach(item => { total++; if (state[item.id]?.done) done++; }));
-  const pct = total ? Math.round((done / total) * 100) : 0;
-  
-  let md = `# LLM Security Assessment Report
-
-**Generated:** ${now.toLocaleDateString()} ${now.toLocaleTimeString()}  
-**Framework:** MITRE ATLAS + OWASP LLM Top 10 (2025)
-
----
-
-## Executive Summary
-
-| Metric | Value |
-|--------|-------|
-| **Overall Progress** | ${pct}% (${done}/${total} items) |
-| **Assessment Date** | ${now.toLocaleDateString()} |
-
-### Progress by Priority
-
-`;
-
-  const stats = { critical: { t: 0, d: 0 }, high: { t: 0, d: 0 }, medium: { t: 0, d: 0 }, low: { t: 0, d: 0 } };
-  data.sections.forEach(sec => sec.items.forEach(item => {
-    if (stats[item.priority]) { stats[item.priority].t++; if (state[item.id]?.done) stats[item.priority].d++; }
-  }));
-  
-  md += `| Priority | Completed | Total | Status |
-|----------|-----------|-------|--------|
-| 🔴 Critical | ${stats.critical.d} | ${stats.critical.t} | ${stats.critical.d === stats.critical.t ? '✅ Complete' : '⚠️ Incomplete'} |
-| 🟠 High | ${stats.high.d} | ${stats.high.t} | ${stats.high.d === stats.high.t ? '✅ Complete' : '⚠️ Incomplete'} |
-| 🟣 Medium | ${stats.medium.d} | ${stats.medium.t} | ${stats.medium.d === stats.medium.t ? '✅ Complete' : '⚠️ Incomplete'} |
-| 🟢 Low | ${stats.low.d} | ${stats.low.t} | ${stats.low.d === stats.low.t ? '✅ Complete' : '⚠️ Incomplete'} |
-
----
-
-## Detailed Assessment
-
-`;
-
-  data.sections.forEach(sec => {
-    const secDone = sec.items.filter(i => state[i.id]?.done).length;
-    const secTotal = sec.items.length;
-    
-    md += `### ${sec.title}
-
-**Progress:** ${secDone}/${secTotal} (${secTotal ? Math.round((secDone/secTotal)*100) : 0}%)  
-**Description:** ${sec.desc}
-
-| Status | Item | Priority | Frameworks | Notes |
-|--------|------|----------|------------|-------|
-`;
-
-    sec.items.forEach(item => {
-      const s = state[item.id] || { done: false, comment: '' };
-      const status = s.done ? '✅' : '⬜';
-      const priority = { critical: '🔴 Critical', high: '🟠 High', medium: '🟣 Medium', low: '🟢 Low' }[item.priority] || item.priority;
-      const frameworks = item.frameworks?.join(', ') || '-';
-      const notes = s.comment ? s.comment.replace(/\|/g, '\\|').replace(/\n/g, ' ') : '-';
-      
-      md += `| ${status} | ${item.title} | ${priority} | ${frameworks} | ${notes} |\n`;
-    });
-    
-    md += '\n';
-    
-    // Add incomplete items with steps
-    const incomplete = sec.items.filter(i => !state[i.id]?.done);
-    if (incomplete.length > 0) {
-      md += `#### Outstanding Items\n\n`;
-      incomplete.forEach(item => {
-        md += `**${item.title}** (${item.priority.toUpperCase()})\n\n`;
-        md += `${item.desc}\n\n`;
-        md += `*Implementation Steps:*\n`;
-        item.steps.forEach((step, i) => md += `${i + 1}. ${step}\n`);
-        md += `\n*Verification:*\n`;
-        item.verify.forEach(v => md += `- ${v}\n`);
-        md += '\n---\n\n';
-      });
+  var now = new Date();
+  var total = 0, done = 0;
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      total++;
+      if (state[data.sections[i].items[j].id] && state[data.sections[i].items[j].id].done) done++;
     }
-  });
-
-  md += `## Appendix: Framework References
-
-### MITRE ATLAS
-- **AML.T0035**: ML Artifact Collection
-- **AML.T0041**: Physical Environment Access
-- **AML.T0010**: ML Supply Chain Compromise
-- **AML.T0051**: LLM Prompt Injection
-- **AML.T0057**: LLM Data Leakage
-- **AML.T0024**: Exfiltration via ML Inference API
-
-### OWASP LLM Top 10 (2025)
-- **LLM01**: Prompt Injection
-- **LLM02**: Sensitive Information Disclosure
-- **LLM03**: Supply Chain Vulnerabilities
-- **LLM05**: Improper Output Handling
-- **LLM06**: Excessive Agency
-- **LLM07**: System Prompt Leakage
-- **LLM08**: Vector and Embedding Weaknesses
-- **LLM10**: Unbounded Consumption
-
----
-
-*Report generated by LLM Security Checklist Tool*  
-*Based on MITRE ATLAS and OWASP LLM Top 10 frameworks*
-`;
-
-  const a = document.createElement('a');
+  }
+  var pct = total ? Math.round((done / total) * 100) : 0;
+  var md = '# LLM Security Assessment Report\n\n**Generated:** ' + now.toLocaleDateString() + ' ' + now.toLocaleTimeString() + '\n**Framework:** MITRE ATLAS + OWASP LLM Top 10 (2025)\n\n---\n\n## Executive Summary\n\n| Metric | Value |\n|--------|-------|\n| **Overall Progress** | ' + pct + '% (' + done + '/' + total + ' items) |\n| **Assessment Date** | ' + now.toLocaleDateString() + ' |\n\n';
+  
+  var stats = { critical: { t: 0, d: 0 }, high: { t: 0, d: 0 }, medium: { t: 0, d: 0 }, low: { t: 0, d: 0 } };
+  for (var i = 0; i < data.sections.length; i++) {
+    for (var j = 0; j < data.sections[i].items.length; j++) {
+      var item = data.sections[i].items[j];
+      if (stats[item.priority]) {
+        stats[item.priority].t++;
+        if (state[item.id] && state[item.id].done) stats[item.priority].d++;
+      }
+    }
+  }
+  
+  md += '### Progress by Priority\n\n| Priority | Completed | Total | Status |\n|----------|-----------|-------|--------|\n| 🔴 Critical | ' + stats.critical.d + ' | ' + stats.critical.t + ' | ' + (stats.critical.d === stats.critical.t ? '✅ Complete' : '⚠️ Incomplete') + ' |\n| 🟠 High | ' + stats.high.d + ' | ' + stats.high.t + ' | ' + (stats.high.d === stats.high.t ? '✅ Complete' : '⚠️ Incomplete') + ' |\n| 🟣 Medium | ' + stats.medium.d + ' | ' + stats.medium.t + ' | ' + (stats.medium.d === stats.medium.t ? '✅ Complete' : '⚠️ Incomplete') + ' |\n| 🟢 Low | ' + stats.low.d + ' | ' + stats.low.t + ' | ' + (stats.low.d === stats.low.t ? '✅ Complete' : '⚠️ Incomplete') + ' |\n\n---\n\n## Detailed Assessment\n\n';
+  
+  for (var i = 0; i < data.sections.length; i++) {
+    var sec = data.sections[i];
+    var secDone = 0;
+    for (var j = 0; j < sec.items.length; j++) {
+      if (state[sec.items[j].id] && state[sec.items[j].id].done) secDone++;
+    }
+    md += '### ' + sec.title + '\n\n**Progress:** ' + secDone + '/' + sec.items.length + ' (' + (sec.items.length ? Math.round((secDone/sec.items.length)*100) : 0) + '%)\n\n| Status | Item | Priority | Frameworks | Notes |\n|--------|------|----------|------------|-------|\n';
+    for (var j = 0; j < sec.items.length; j++) {
+      var item = sec.items[j];
+      var s = state[item.id] || { done: false, comment: '' };
+      md += '| ' + (s.done ? '✅' : '⬜') + ' | ' + item.title + ' | ' + item.priority + ' | ' + (item.frameworks ? item.frameworks.join(', ') : '-') + ' | ' + (s.comment ? s.comment.replace(/\|/g, '\\|').replace(/\n/g, ' ') : '-') + ' |\n';
+    }
+    md += '\n';
+  }
+  
+  md += '\n## Appendix: Framework References\n\n### MITRE ATLAS\n- AML.T0035: ML Artifact Collection\n- AML.T0041: Physical Environment Access\n- AML.T0010: ML Supply Chain Compromise\n- AML.T0051: LLM Prompt Injection\n- AML.T0057: LLM Data Leakage\n- AML.T0024: Exfiltration via ML Inference API\n\n### OWASP LLM Top 10 (2025)\n- LLM01: Prompt Injection\n- LLM02: Sensitive Information Disclosure\n- LLM03: Supply Chain Vulnerabilities\n- LLM05: Improper Output Handling\n- LLM06: Excessive Agency\n- LLM07: System Prompt Leakage\n- LLM08: Vector and Embedding Weaknesses\n- LLM10: Unbounded Consumption\n\n---\n\n*Report generated by LLM Security Checklist Tool*\n';
+  
+  var a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
-  a.download = `llm-security-report-${now.toISOString().split('T')[0]}.md`;
+  a.download = 'llm-security-report-' + now.toISOString().split('T')[0] + '.md';
   a.click();
   toast('Report exported', 'success');
 }
 
-// IMPORT
 function importJSON(e) {
-  const file = e.target.files[0];
+  var file = e.target.files[0];
   if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
+  var reader = new FileReader();
+  reader.onload = function(ev) {
     try {
-      const d = JSON.parse(ev.target.result);
+      var d = JSON.parse(ev.target.result);
       if (d.state) {
-        Object.keys(d.state).forEach(k => { if (state[k] !== undefined) state[k] = d.state[k]; });
+        for (var k in d.state) {
+          if (state[k] !== undefined) state[k] = d.state[k];
+        }
         saveState();
         renderSections();
-        toast('Imported successfully', 'success');
+        toast('Imported', 'success');
       }
-    } catch { toast('Import failed', 'error'); }
+    } catch(err) { toast('Import failed', 'error'); }
   };
   reader.readAsText(file);
   e.target.value = '';
 }
 
 function resetAll() {
-  if (confirm('Reset all progress? This cannot be undone.')) {
+  if (confirm('Reset all progress?')) {
     localStorage.removeItem(STATE_KEY);
     state = {};
     loadState();
@@ -772,23 +541,22 @@ function resetAll() {
   }
 }
 
-// UTILS
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
-function toast(msg, type = 'info') {
-  const c = document.getElementById('toast');
-  const colors = { success: 'bg-accent-green/20 border-accent-green text-accent-green', error: 'bg-accent-red/20 border-accent-red text-accent-red', info: 'bg-accent-cyan/20 border-accent-cyan text-accent-cyan' };
-  const t = document.createElement('div');
-  t.className = `px-4 py-3 rounded-lg border ${colors[type]} font-mono text-sm animate-slide-up`;
+function toast(msg, type) {
+  type = type || 'info';
+  var c = document.getElementById('toast');
+  var colors = { success: 'bg-accent-green/20 border-accent-green text-accent-green', error: 'bg-accent-red/20 border-accent-red text-accent-red', info: 'bg-accent-cyan/20 border-accent-cyan text-accent-cyan' };
+  var t = document.createElement('div');
+  t.className = 'px-4 py-3 rounded-lg border ' + colors[type] + ' font-mono text-sm animate-slide-up';
   t.textContent = msg;
   c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+  setTimeout(function() { t.style.opacity = '0'; setTimeout(function() { t.remove(); }, 300); }, 3000);
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDetail(); closeComment(); closeSidebar(); } });
+document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { closeDetail(); closeComment(); closeSidebar(); } });
 
-// INIT
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', function() {
   loadState();
   renderTOC();
   renderSections();
